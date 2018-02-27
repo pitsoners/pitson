@@ -1,0 +1,202 @@
+USE Pitson
+GO
+
+--===============================================================================
+-- Procedure qui permet de créer une nouvelle machine dans la base
+-- @IdModele est le nom de la machine à créer
+-- @message est le message retour
+-- Code retour :
+--			0. OK
+--			1. Paramètre d'entrée à valeur nulle ou incohérente
+--			2. Identifiant machine existant
+--			3. Exception
+--===============================================================================
+CREATE PROC creerMachine @LibellePresse TypeNomPresse,  @messageRetour TypeMessageRetour output
+AS
+DECLARE @codeRetour Tinyint;
+
+BEGIN TRY
+	BEGIN
+		IF @LibellePresse IS NULL OR @LibellePresse = ''
+		BEGIN
+			SET @codeRetour = 1 ;
+			SET @messageRetour = 'Nom de la presse nul ou vide.';
+		END
+		ELSE IF EXISTS (SELECT LibellePresse FROM Machine WHERE LibellePresse = @LibellePresse)
+		BEGIN
+			SET @codeRetour = 2 ;
+			SET @messageRetour = 'Nom de la presse déjà existant.';
+		END
+		ELSE
+		BEGIN
+		-- Par défaut lors de la création de la machine, le BIT En service vaut 1
+			INSERT INTO Machine (LibellePresse, EnService) VALUES (@LibellePresse, 1);
+			SET @codeRetour = 0 ;
+			SET @messageRetour = 'Machine ajouté dans la table avec succès.';
+		END
+	END
+END TRY
+BEGIN CATCH
+	SET @messageRetour = 'Erreur base de données : ' + ERROR_MESSAGE() ;
+	SET @codeRetour = 3 ;
+END CATCH
+
+RETURN @CodeRetour;
+GO
+
+
+--===============================================================================
+-- Procedure qui permet de supprimer une machine dans la base
+-- @IdPresse est le nom de la machine à supprimer
+-- @messageRetour est le message retour
+-- Code retour :
+--			0. OK
+--			1. Paramètre d'entrée à valeur nulle ou incohérente
+--			2. Identifiant machine non reconnu
+--			3. Machine encore liée à une autre table
+--			4. Exception
+--===============================================================================
+CREATE PROC supprimerMachine @IdPresse INT, @messageRetour TypeMessageRetour output
+AS
+DECLARE @codeRetour Tinyint;
+
+BEGIN TRY
+	BEGIN
+		IF @IdPresse IS NULL OR @IdPresse <= 0
+		BEGIN
+			SET @codeRetour = 1 ;
+			SET @messageRetour = 'ID presse nul ou négatif.';
+		END
+		ELSE IF NOT EXISTS (SELECT IdPresse FROM Machine WHERE IdPresse = @IdPresse)
+		BEGIN
+			SET @codeRetour = 2 ;
+			SET @messageRetour = 'Cette presse n''existe pas dans la table.';
+		END
+		ELSE IF EXISTS (SELECT IdPresse FROM Lot WHERE IdPresse = @IdPresse)
+		BEGIN
+			SET @codeRetour = 3 ;
+			SET @messageRetour = 'Cette presse est encore liée à des lots existants.';
+		END
+		ELSE
+		BEGIN
+			DELETE FROM Machine
+			WHERE IdPresse = @IdPresse ;
+			SET @codeRetour = 0 ;
+			SET @messageRetour = 'Machine supprimée de la table avec succès.';
+		END
+	END
+END TRY
+BEGIN CATCH
+	SET @messageRetour = 'Erreur base de données : ' + ERROR_MESSAGE() ;
+	SET @codeRetour = 4 ;
+END CATCH
+
+RETURN @CodeRetour;
+GO
+
+--===============================================================================
+-- Procedure qui permet de renommer une machine dans la base
+-- @IdPresseARenommer est le nom de la machine à renommer
+-- @NouveauNom est le nouveau nom à affecter à la machine
+-- @messageRetour est le message retour
+-- Code retour :
+--			0. OK
+--			1. Paramètre d'entrée à valeur nulle ou incohérente
+--			2. Identifiant machine non reconnu
+--			3. Nouveau nom déjà existant
+--			4. Exception
+--===============================================================================
+CREATE PROC renommerMachine @IdPresseARenommer INT, @NouveauNom TypeIDModele, @messageRetour TypeMessageRetour output
+AS
+DECLARE @codeRetour Tinyint;
+
+BEGIN TRY
+	BEGIN
+		IF @IdPresseARenommer IS NULL OR @IdPresseARenommer <= 0
+		BEGIN
+			SET @codeRetour = 1 ;
+			SET @messageRetour = 'Numéro de presse à renommer nul ou négatif.';
+		END
+		ELSE IF @NouveauNom IS NULL OR @NouveauNom = ''
+		BEGIN
+			SET @codeRetour = 1 ;
+			SET @messageRetour = 'Nouveau nom de presse nul ou vide.';
+		END
+		ELSE IF NOT EXISTS (SELECT IdPresse FROM Machine WHERE IdPresse = @IdPresseARenommer)
+		BEGIN
+			SET @codeRetour = 2 ;
+			SET @messageRetour = 'La presse à renommer n''existe pas dans la table.';
+		END
+		ELSE IF EXISTS (SELECT IdPresse FROM Machine WHERE LibellePresse = @NouveauNom)
+		BEGIN
+			SET @codeRetour = 3 ;
+			SET @messageRetour = 'Le nouveau nom à affecter à la presse existe déjà dans la table.';
+		END
+		ELSE
+		BEGIN
+			UPDATE Machine
+			SET LibellePresse = @NouveauNom
+			WHERE IdPresse = @IdPresseARenommer ;
+			SET @codeRetour = 0 ;
+			SET @messageRetour = 'Modèle renommé avec succès.';
+		END
+	END
+END TRY
+BEGIN CATCH
+	SET @messageRetour = 'Erreur base de données : ' + ERROR_MESSAGE() ;
+	SET @codeRetour = 4 ;
+END CATCH
+
+RETURN @CodeRetour;
+GO
+
+
+--===============================================================================
+-- Procedure qui permet changer le statut d'une machine (obsolète ou non)
+-- @IdPresse est le nom de la machine à updater
+-- @statut est le statut à affecter à la machine (0 en service, 1 hors service)
+-- @messageRetour est le message retour
+-- Code retour :
+--			0. OK
+--			1. Paramètre d'entrée à valeur nulle ou incohérente
+--			2. Identifiant machine non reconnu
+--			3. Exception
+--===============================================================================
+CREATE PROC changerStatutMachine @IdPresse INT, @enService BIT, @messageRetour TypeMessageRetour output
+AS
+DECLARE @codeRetour Tinyint;
+
+BEGIN TRY
+	BEGIN
+		IF @IdPresse IS NULL OR @IdPresse <= 0
+		BEGIN
+			SET @codeRetour = 1 ;
+			SET @messageRetour = 'Nom de la presse à mettre à jour nul ou vide.';
+		END
+		ELSE IF @enService IS NULL OR @enService NOT IN(0,1)
+		BEGIN
+			SET @codeRetour = 1 ;
+			SET @messageRetour = 'Le statut à affecter est nul ou du mauvais format.';
+		END
+		ELSE IF NOT EXISTS (SELECT IdPresse FROM Machine WHERE IdPresse = @IdPresse)
+		BEGIN
+			SET @codeRetour = 2 ;
+			SET @messageRetour = 'La presse à mettre à jour n''existe pas dans la table.';
+		END
+		ELSE
+		BEGIN
+			UPDATE Machine
+			SET EnService = @enService
+			WHERE IdPresse = @IdPresse ;
+			SET @codeRetour = 0 ;
+			SET @messageRetour = 'Statut mis à jour avec succès.';
+		END
+	END
+END TRY
+BEGIN CATCH
+	SET @messageRetour = 'Erreur base de données : ' + ERROR_MESSAGE() ;
+	SET @codeRetour = 4 ;
+END CATCH
+
+RETURN @CodeRetour;
+GO

@@ -1,0 +1,214 @@
+USE Pitson
+GO
+
+--===============================================================================
+-- Procedure qui permet de créer un nouveau modèle dans la base
+-- @IdModele est le nom du modèle à créer
+-- @diametre est le diamètre nominal du modèle
+-- @message est le message retour
+-- Code retour :
+--			0. OK
+--			1. Paramètre d'entrée à valeur nulle ou incohérente
+--			2. Identifiant modèle existant
+--			3. Exception
+--===============================================================================
+CREATE PROC creerModele @IdModele TypeIDModele, @diametre TypeMesure,  @messageRetour TypeMessageRetour output
+AS
+DECLARE @codeRetour Tinyint;
+
+BEGIN TRY
+	BEGIN
+		IF @IdModele IS NULL OR @IdModele = ''
+		BEGIN
+			SET @codeRetour = 1 ;
+			SET @messageRetour = 'Nom du modèle nul ou vide.';
+		END
+		ELSE IF @diametre IS NULL OR @diametre <= 0
+		BEGIN
+			SET @codeRetour = 1 ;
+			SET @messageRetour = 'Le diamètre renseigné est nul ou négatif.';
+		END
+		ELSE IF EXISTS (SELECT IdModele FROM Modele WHERE IdModele = @IdModele)
+		BEGIN
+			SET @codeRetour = 2 ;
+			SET @messageRetour = 'Nom du modèle déjà existant.';
+		END
+		ELSE
+		BEGIN
+		-- Par défaut lors de la création du modèle, le BIT Obsolete vaut 0
+			INSERT INTO Modele VALUES (@IdModele, @diametre, 0);
+			SET @codeRetour = 0 ;
+			SET @messageRetour = 'Modèle ajouté dans la table avec succès.';
+		END
+	END
+END TRY
+BEGIN CATCH
+	SET @messageRetour = 'Erreur base de données : ' + ERROR_MESSAGE() ;
+	SET @codeRetour = 3 ;
+END CATCH
+
+RETURN @CodeRetour;
+GO
+
+
+--===============================================================================
+-- Procedure qui permet de supprimer un modèle dans la base
+-- @IdModele est le nom du modèle à supprimer
+-- @messageRetour est le message retour
+-- Code retour :
+--			0. OK
+--			1. Paramètre d'entrée à valeur nulle ou incohérente
+--			2. Identifiant modèle non reconnu
+--			3. Modèle encore lié à une autre table
+--			4. Exception
+--===============================================================================
+CREATE PROC supprimerModele @IdModele TypeIDModele, @messageRetour TypeMessageRetour output
+AS
+DECLARE @codeRetour Tinyint;
+
+BEGIN TRY
+	BEGIN
+		IF @IdModele IS NULL OR @IdModele = ''
+		BEGIN
+			SET @codeRetour = 1 ;
+			SET @messageRetour = 'Nom du modèle nul ou vide.';
+		END
+		ELSE IF NOT EXISTS (SELECT IdModele FROM Modele WHERE IdModele = @IdModele)
+		BEGIN
+			SET @codeRetour = 2 ;
+			SET @messageRetour = 'Ce modèle n''existe pas dans la table.';
+		END
+		ELSE IF EXISTS (SELECT IdModele FROM Lot WHERE IdModele = @IdModele)
+		BEGIN
+			SET @codeRetour = 3 ;
+			SET @messageRetour = 'Ce modèle est encore lié à des lots existants.';
+		END
+		ELSE IF EXISTS (SELECT IdModele FROM Stock WHERE IdModele = @IdModele)
+		BEGIN
+			SET @codeRetour = 3 ;
+			SET @messageRetour = 'Ce modèle est encore lié à des pièces en stock.';
+		END
+		ELSE
+		BEGIN
+			DELETE Modele
+			FROM Modele
+			WHERE IdModele = @IdModele ;
+			SET @codeRetour = 0 ;
+			SET @messageRetour = 'Modèle supprimé de la table avec succès.';
+		END
+	END
+END TRY
+BEGIN CATCH
+	SET @messageRetour = 'Erreur base de données : ' + ERROR_MESSAGE() ;
+	SET @codeRetour = 4 ;
+END CATCH
+
+RETURN @CodeRetour;
+GO
+
+--===============================================================================
+-- Procedure qui permet de renommer un modèle dans la base
+-- @IdModeleARenommer est le nom du modèle à renommer
+-- @NouveauNom est le nouveau nom à affecter au modèle
+-- @messageRetour est le message retour
+-- Code retour :
+--			0. OK
+--			1. Paramètre d'entrée à valeur nulle ou incohérente
+--			2. Identifiant modèle non reconnu
+--			3. Nouveau nom déjà existant
+--			4. Exception
+--===============================================================================
+CREATE PROC renommerModele @IdModeleARenommer TypeIDModele, @NouveauNom TypeIDModele, @messageRetour TypeMessageRetour output
+AS
+DECLARE @codeRetour Tinyint;
+
+BEGIN TRY
+	BEGIN
+		IF @IdModeleARenommer IS NULL OR @IdModeleARenommer = ''
+		BEGIN
+			SET @codeRetour = 1 ;
+			SET @messageRetour = 'Nom du modèle à renommer nul ou vide.';
+		END
+		ELSE IF @NouveauNom IS NULL OR @NouveauNom = ''
+		BEGIN
+			SET @codeRetour = 1 ;
+			SET @messageRetour = 'Nouveau nom de modèle nul ou vide.';
+		END
+		ELSE IF NOT EXISTS (SELECT IdModele FROM Modele WHERE IdModele = @IdModeleARenommer)
+		BEGIN
+			SET @codeRetour = 2 ;
+			SET @messageRetour = 'Le modèle à renommer n''existe pas dans la table.';
+		END
+		ELSE IF EXISTS (SELECT IdModele FROM Modele WHERE IdModele = @NouveauNom)
+		BEGIN
+			SET @codeRetour = 3 ;
+			SET @messageRetour = 'Le nouveau nom à affecter au modèle existe déjà dans la table.';
+		END
+		ELSE
+		BEGIN
+			UPDATE Modele
+			SET IdModele = @NouveauNom
+			WHERE IdModele = @IdModeleARenommer ;
+			SET @codeRetour = 0 ;
+			SET @messageRetour = 'Modèle renommé avec succès.';
+		END
+	END
+END TRY
+BEGIN CATCH
+	SET @messageRetour = 'Erreur base de données : ' + ERROR_MESSAGE() ;
+	SET @codeRetour = 4 ;
+END CATCH
+
+RETURN @CodeRetour;
+GO
+
+
+--===============================================================================
+-- Procedure qui permet changer le statut d'un modèle (obsolète ou non)
+-- @IdModele est le nom du modèle à updater
+-- @statut est le statut à affecter au modèle (0 en service, 1 obsolète)
+-- @messageRetour est le message retour
+-- Code retour :
+--			0. OK
+--			1. Paramètre d'entrée à valeur nulle ou incohérente
+--			2. Identifiant modèle non reconnu
+--			3. Exception
+--===============================================================================
+CREATE PROC changerStatutModele @IdModele TypeIDModele, @statut BIT, @messageRetour TypeMessageRetour output
+AS
+DECLARE @codeRetour Tinyint;
+
+BEGIN TRY
+	BEGIN
+		IF @IdModele IS NULL OR @IdModele = ''
+		BEGIN
+			SET @codeRetour = 1 ;
+			SET @messageRetour = 'Nom du modèle à mettre à jour nul ou vide.';
+		END
+		ELSE IF @statut IS NULL OR @statut NOT IN(0,1)
+		BEGIN
+			SET @codeRetour = 1 ;
+			SET @messageRetour = 'Le statut à affecter est nul ou du mauvais format.';
+		END
+		ELSE IF NOT EXISTS (SELECT IdModele FROM Modele WHERE IdModele = @IdModele)
+		BEGIN
+			SET @codeRetour = 2 ;
+			SET @messageRetour = 'Le modèle n''existe pas dans la table.';
+		END
+		ELSE
+		BEGIN
+			UPDATE Modele
+			SET Obsolete = @statut
+			WHERE IdModele = @IdModele ;
+			SET @codeRetour = 0 ;
+			SET @messageRetour = 'Statut mis à jour avec succès.';
+		END
+	END
+END TRY
+BEGIN CATCH
+	SET @messageRetour = 'Erreur base de données : ' + ERROR_MESSAGE() ;
+	SET @codeRetour = 4 ;
+END CATCH
+
+RETURN @CodeRetour;
+GO

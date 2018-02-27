@@ -1,0 +1,41 @@
+/* type mesures (utilisé pour les mesures dans PIECE, les marges de tolérance dans CATEGORIES, le diamètre dans MODELE */
+CREATE TYPE TypeMesure
+FROM DECIMAL(5,3)
+NULL
+
+/* type statistique (utilisé pour moyenne et écart type dans LOT */
+CREATE TYPE TypeStat
+FROM DECIMAL(9,7)
+NULL
+
+/* type ID modèle */
+CREATE TYPE TypeIDModele
+FROM VARCHAR(12)
+NULL
+
+/* type nom presse */
+CREATE TYPE TypeNomPresse
+FROM VARCHAR(15)
+NULL
+
+/* type état, pour l'état de la production et du contrôle (3 valeurs possibles : EN ATTENTE, EN COURS, TERMINE) */
+CREATE TYPE TypeEtat
+FROM VARCHAR(10)
+NULL
+
+/* type catégorie de pièce (4 valeurs possibles : PETIT, MOYEN, GRAND, REBUT) */
+CREATE TYPE TypeCategorie
+FROM CHAR(5)
+NULL
+
+/* type message retour d'une procédure */
+CREATE TYPE TypeMessageRetour
+FROM VARCHAR(255)
+NULL
+
+/* type commentaire (commentaire pour le contrôle visuel notamment) */
+CREATE TYPE TypeCommentaire
+FROM VARCHAR(255)
+NULL
+
+GO

@@ -1,0 +1,20 @@
+DROP TABLE Cumul
+GO
+
+DROP TABLE Piece
+GO
+
+DROP TABLE Lot
+GO
+
+DROP TABLE Stock
+GO
+
+DROP TABLE Categorie
+GO
+
+DROP TABLE Modele
+GO
+
+DROP TABLE Machine
+GO
