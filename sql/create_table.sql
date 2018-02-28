@@ -79,7 +79,7 @@ CREATE TABLE Piece
 	dimensionBL TypeMesure NOT NULL,
 	dimensionBT TypeMesure NOT NULL,
 	defautVisuel bit NOT NULL,
-	dommentaire TypeCommentaire NULL,
+	commentaire TypeCommentaire NULL,
 	FOREIGN KEY (idLot) REFERENCES Lot (idLot),
 	FOREIGN KEY (idCategorie) REFERENCES Categorie (idCategorie)
 )
