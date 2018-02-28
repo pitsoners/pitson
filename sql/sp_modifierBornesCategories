@@ -27,32 +27,32 @@ BEGIN TRY
 			SET @codeRetour = 3 ;
 			SET @messageRetour = 'Des lots on déjà été créés, les seuils de tolérance des catégories sont maintenant verrouillées.';
 		END
-		ELSE IF @minPetit = NULL
+		ELSE IF @minPetit IS NULL
 		BEGIN
 			SET @codeRetour = 1 ;
 			SET @messageRetour = 'La borne minimum de la catégorie petit est nulle.';
 		END
-		ELSE IF @maxPetit = NULL
+		ELSE IF @maxPetit IS NULL
 		BEGIN
 			SET @codeRetour = 1 ;
 			SET @messageRetour = 'La borne maximum de la catégorie petit est nulle.';
 		END
-		ELSE IF @minMoyen = NULL
+		ELSE IF @minMoyen IS NULL
 		BEGIN
 			SET @codeRetour = 1 ;
 			SET @messageRetour = 'La borne minimum de la catégorie moyen est nulle.';
 		END
-		ELSE IF @maxMoyen = NULL
+		ELSE IF @maxMoyen IS NULL
 		BEGIN
 			SET @codeRetour = 1 ;
 			SET @messageRetour = 'La borne maximum de la catégorie moyen est nulle.';
 		END
-		ELSE IF @minGrand = NULL
+		ELSE IF @minGrand IS NULL
 		BEGIN
 			SET @codeRetour = 1 ;
 			SET @messageRetour = 'La borne minimum de la catégorie grand est nulle.';
 		END
-		ELSE IF @maxGrand = NULL
+		ELSE IF @maxGrand IS NULL
 		BEGIN
 			SET @codeRetour = 1 ;
 			SET @messageRetour = 'La borne maximum de la catégorie grand est nulle.';
