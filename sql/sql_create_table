@@ -2,90 +2,93 @@
 ****************Création des Tables*****************
 ***************************************************/
 
+USE Pitson
+GO
+
 CREATE TABLE Machine
 (
-	IdPresse int PRIMARY KEY IDENTITY (1,1),
-	LibellePresse TypeNomPresse UNIQUE NOT NULL,
-	EnService bit NOT NULL
+	idPresse int PRIMARY KEY IDENTITY (1,1),
+	libellePresse TypeNomPresse UNIQUE NOT NULL,
+	enService bit NOT NULL
 )
 GO
 
 CREATE TABLE Modele
 (
-	IdModele TypeIDModele PRIMARY KEY,
-	Diametre TypeMesure NOT NULL,
-	Obsolete BIT NOT NULL
+	idModele TypeIDModele PRIMARY KEY,
+	diametre TypeMesure NOT NULL,
+	obsolete BIT NOT NULL
 )
 GO
 
 
 CREATE TABLE Categorie
 (
-	IdCategorie TypeCategorie PRIMARY KEY,
-	ToleranceMini TypeMesure NULL,
-	ToleranceMaxi TypeMesure NULL
+	idCategorie TypeCategorie PRIMARY KEY,
+	toleranceMini TypeMesure NULL,
+	toleranceMaxi TypeMesure NULL
 )
 GO
 
 CREATE TABLE Stock
 (
-	IdModele TypeIDModele REFERENCES Modele (IdModele) ON UPDATE CASCADE NOT NULL,
-	IdCategorie TypeCategorie REFERENCES Categorie (IdCategorie) NOT NULL,
-	QtStock int NOT NULL,
-	SeuilMini int NOT NULL,
+	idModele TypeIDModele REFERENCES Modele (idModele) ON UPDATE CASCADE NOT NULL,
+	idCategorie TypeCategorie REFERENCES Categorie (idCategorie) NOT NULL,
+	qtStock int NOT NULL,
+	seuilMini int NOT NULL,
 	PRIMARY KEY (IdModele, IdCategorie)
 )
 GO 
 
 CREATE TABLE Lot
 (
-	IdLot int PRIMARY KEY IDENTITY (1,1),
-	DateFabrication DATETIME NOT NULL,
-	EtatProduction TypeEtat CHECK (EtatProduction IN ('Attente', 'EnCour', 'Termine')) NOT NULL,
-	EtatControl TypeEtat CHECK (EtatControl IN ('Attente', 'EnCour','Termine')) NOT NULL,
-	IdModele TypeIDModele REFERENCES Modele (IdModele) ON UPDATE CASCADE,
-	IdPresse int,
-	MoyenneHL TypeStat NULL,
-	MoyenneHT TypeStat NULL,
-	MoyenneBL TypeStat NULL,
-	MoyenneBT TypeStat NULL,
-	MiniHL TypeMesure NULL,
-	MiniHT TypeMesure NULL,
-	MiniBL TypeMesure NULL,
-	MiniBT TypeMesure NULL,
-	MaxiHL TypeMesure NULL,
-	MaxiHT TypeMesure NULL,
-	MaxiBL TypeMesure NULL,
-	MaxiBT TypeMesure NULL,
-	EcartTypeHL TypeStat NULL,
-	EcartTypeHT TypeStat NULL,
-	EcartTypeBL TypeStat NULL,
-	EcartTypeBT TypeStat NULL,
-	NbrPieceDemande int NOT NULL
+	idLot int PRIMARY KEY IDENTITY (1,1),
+	dateFabrication DATETIME NOT NULL,
+	etatProduction TypeEtat CHECK (etatProduction IN ('Attente', 'EnCour', 'Termine')) NOT NULL,
+	etatControle TypeEtat CHECK (etatControle IN ('Attente', 'EnCour','Termine')) NOT NULL,
+	idModele TypeIDModele REFERENCES Modele (idModele) ON UPDATE CASCADE,
+	idPresse int,
+	moyenneHL TypeStat NULL,
+	moyenneHT TypeStat NULL,
+	moyenneBL TypeStat NULL,
+	moyenneBT TypeStat NULL,
+	miniHL TypeMesure NULL,
+	miniHT TypeMesure NULL,
+	miniBL TypeMesure NULL,
+	miniBT TypeMesure NULL,
+	maxiHL TypeMesure NULL,
+	maxiHT TypeMesure NULL,
+	maxiBL TypeMesure NULL,
+	maxiBT TypeMesure NULL,
+	ecartTypeHL TypeStat NULL,
+	ecartTypeHT TypeStat NULL,
+	ecartTypeBL TypeStat NULL,
+	ecartTypeBT TypeStat NULL,
+	nbrPieceDemande int NOT NULL
 )
 GO
 
 CREATE TABLE Piece
 (
-	IdPiece int PRIMARY KEY IDENTITY (1,1),
-	IdLot int NOT NULL,
-	IdCategorie TypeCategorie NOT NULL,
-	DimensionHL TypeMesure NOT NULL,
-	DimensionHT TypeMesure NOT NULL,
-	DimensionBL TypeMesure NOT NULL,
-	DimensionBT TypeMesure NOT NULL,
-	DefautVisuel bit NOT NULL,
-	Commentaire TypeCommentaire NULL,
-	FOREIGN KEY (IdLot) REFERENCES Lot (IdLot),
-	FOREIGN KEY (IdCategorie) REFERENCES Categorie (IdCategorie)
+	idPiece int PRIMARY KEY IDENTITY (1,1),
+	idLot int NOT NULL,
+	idCategorie TypeCategorie NOT NULL,
+	dimensionHL TypeMesure NOT NULL,
+	dimensionHT TypeMesure NOT NULL,
+	dimensionBL TypeMesure NOT NULL,
+	dimensionBT TypeMesure NOT NULL,
+	defautVisuel bit NOT NULL,
+	dommentaire TypeCommentaire NULL,
+	FOREIGN KEY (idLot) REFERENCES Lot (idLot),
+	FOREIGN KEY (idCategorie) REFERENCES Categorie (idCategorie)
 )
 GO
 
 CREATE TABLE Cumul
 (
-	IdLot int REFERENCES Lot(IdLot) NOT NULL,
-	IdCategorie TypeCategorie REFERENCES Categorie (IdCategorie) NOT NULL,
-	NbrPiece int NOT NULL,
-	PRIMARY KEY (IdLot, IdCategorie)
+	idLot int REFERENCES Lot(idLot) NOT NULL,
+	idCategorie TypeCategorie REFERENCES Categorie (idCategorie) NOT NULL,
+	nbrPiece int NOT NULL,
+	PRIMARY KEY (idLot, idCategorie)
 )
 GO
