@@ -2,7 +2,7 @@ use Pitson
 go
 
 --===============================================================================
--- View qui permet de verifier si il y a des machines libres
+-- View qui permet de vérifier si il y a des machines libres
 --===============================================================================
 
 CREATE view MachinesLibres
