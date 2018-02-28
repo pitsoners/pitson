@@ -10,7 +10,10 @@
 						3 => Erreur base de donnée (Exception)
 -- Sortie : @mes = Contient le message d'erreur ou de réussite 
 -- =============================================================*/
-CREATE PROC sp_demarrerProd (@idLot int, @msg varchar(250) OUTPUT)
+USE Pitson
+GO
+
+ALTER PROC sp_demarrerProd (@idLot int, @idMachine int, @msg varchar(250) OUTPUT)
 AS
 	DECLARE @retour int;
 	BEGIN TRY
@@ -19,6 +22,11 @@ AS
 		BEGIN
 			SET @retour = 1;
 			SET @msg = 'Id du lot manquant';
+		END
+		ELSE IF @idMachine IS NULL OR @idMachine = ''
+		BEGIN
+			SET @retour = 1;
+			SET @msg = 'Machine manquante';
 		END
 		-- Verification de l'existance du lot
 		ELSE IF NOT EXISTS (
@@ -31,11 +39,11 @@ AS
 			SET @msg = 'Ce lot n''existe pas';
 		END
 		-- Vérifier que la production n'a pas déjà été lancée
-		ELSE IF NOT EXISTS (
-						SELECT Lot.idLot
-						FROM Lot
-						WHERE Lot.idLot = @IdLot
-						AND Lot.etatProduction = 'Attente'
+		ELSE IF NOT	EXISTS (
+							SELECT Lot.idLot
+							FROM Lot
+							WHERE Lot.idLot = @IdLot
+							AND Lot.etatProduction = 'Attente'
 						)
 		BEGIN 
 			SET @retour = 2;
@@ -43,22 +51,34 @@ AS
 		END
 		-- Verifier que le control n'a pas été lancé
 		ELSE IF NOT EXISTS (
-						SELECT Lot.idLot 
-						FROM Lot
-						WHERE Lot.idLot = @IdLot 
-						AND Lot.etatControle = 'Attente'
-						)
+							SELECT Lot.idLot 
+							FROM Lot
+							WHERE Lot.idLot = @idLot 
+							AND Lot.etatControle = 'Attente'
+							)
 		BEGIN
 			SET @retour = 2;
 			SET @msg = 'Le control a déjà été lancée'
 		END
+		-- Verification de disponibilité de la machine
+		ELSE IF NOT EXISTS (
+							SELECT *
+							FROM MachinesLibres
+							WHERE MachinesLibres.IdPresse = @idMachine
+							)
+		BEGIN
+			SET @retour = 2;
+			SET @msg = 'La machine n''est pas disponible'
+		END
 		ELSE 
 		BEGIN
 			UPDATE Lot 
-			SET Lot.etatProduction = 'EnCour'
+			SET Lot.etatProduction = 'EnCours',
+				 Lot.idPresse = @idMachine
 			WHERE Lot.idLot = @idLot
+
 			SET @retour = 0;
-			SET @msg = 'Etat de la production mise à jour de "Attente" à "En Cour"'
+			SET @msg = 'Etat de la production mise à jour de "Attente" à "En Cours"'
 		END
 	END TRY
 
