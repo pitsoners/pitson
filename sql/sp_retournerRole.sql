@@ -1,8 +1,9 @@
 USE Pitson
 GO
--- retourne un résultat contenant le nom des rôles affectés à l'utilisateur actuellement connecté. le code de retour est toujours 0
--- les rôles sont ceux définis dans la base de données (cf 'sql/sql roles.sql')
-ALTER PROCEDURE retournerRole
+-- retourne un résultat contenant le nom des rôles affectés à l'utilisateur actuellement connecté.
+-- les rôles sont ceux définis dans la base de données (cf 'sql/sql_roles.sql')
+-- le code de retour est toujours 0
+ALTER PROCEDURE sp_retournerRole
 AS
 BEGIN
 	DECLARE @codeRetour int;
