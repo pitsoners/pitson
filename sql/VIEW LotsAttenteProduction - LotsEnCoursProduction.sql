@@ -8,7 +8,7 @@ AS
 	WHERE etatProduction = 'Attente';
 GO
 
-CREATE PROCEDURE LotsEnCoursProduction
+CREATE VIEW LotsEnCoursProduction
 AS
 	SELECT idLot, dateDemande, idModele, dateProduction, idPresse
 	FROM Lot
