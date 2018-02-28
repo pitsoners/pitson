@@ -11,7 +11,7 @@
 -- Sortie : @mes = Contient le message d'erreur ou de réussite 
 -- =============================================================*/
 
-CREATE PROC sp_terminerControl (@idLot int, @msg varchar(250) OUTPUT)
+CREATE PROC sp_terminerControle (@idLot int, @msg varchar(250) OUTPUT)
 AS
 	DECLARE @retour int;
 	BEGIN TRY
