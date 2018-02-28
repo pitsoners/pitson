@@ -49,7 +49,7 @@ BEGIN
 				END
 			ELSE
 				BEGIN
-					INSERT INTO Lot (dateFabrication, etatProduction, etatControle, idModele, nbrPieceDemande) OUTPUT INSERTED.idLot VALUES (GETDATE(), 'Attente', 'Attente', @modele, @quantite);
+					INSERT INTO Lot (dateDemande, etatProduction, etatControle, idModele, nbrPieceDemande) OUTPUT INSERTED.idLot VALUES (GETDATE(), 'Attente', 'Attente', @modele, @quantite);
 					SET @codeRetour = 0;
 					SET @messageRetour = 'Lot ajouté';
 				END
