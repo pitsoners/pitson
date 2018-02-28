@@ -43,9 +43,10 @@ GO
 CREATE TABLE Lot
 (
 	idLot int PRIMARY KEY IDENTITY (1,1),
-	dateFabrication DATETIME NOT NULL,
-	etatProduction TypeEtat CHECK (etatProduction IN ('Attente', 'EnCour', 'Termine')) NOT NULL,
-	etatControle TypeEtat CHECK (etatControle IN ('Attente', 'EnCour','Termine')) NOT NULL,
+	dateDemande DATETIME NOT NULL,
+	dateProduction DATETIME NULL,
+	etatProduction TypeEtat CHECK (etatProduction IN ('Attente', 'EnCours', 'Termine')) NOT NULL,
+	etatControle TypeEtat CHECK (etatControle IN ('Attente', 'EnCours','Termine')) NOT NULL,
 	idModele TypeIDModele REFERENCES Modele (idModele) ON UPDATE CASCADE,
 	idPresse int,
 	moyenneHL TypeStat NULL,
