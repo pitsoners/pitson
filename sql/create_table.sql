@@ -24,7 +24,7 @@ GO
 
 CREATE TABLE Categorie
 (
-	idCategorie TypeCategorie PRIMARY KEY,
+	idCategorie TypeCategorie CHECK (idCategorie IN ('Petit', 'Moyen', 'Grand', 'Rebut')) PRIMARY KEY,
 	toleranceMini TypeMesure NULL,
 	toleranceMaxi TypeMesure NULL
 )
