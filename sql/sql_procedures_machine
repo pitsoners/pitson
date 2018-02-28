@@ -11,12 +11,13 @@ GO
 --			2. Identifiant machine existant
 --			3. Exception
 --===============================================================================
-CREATE PROC sp_creerMachine @libellePresse TypeNomPresse,  @messageRetour TypeMessageRetour output
+CREATE PROC sp_creerMachine @libellePresse TypeNomPresse, @iDcree INT output, @messageRetour TypeMessageRetour output
 AS
 DECLARE @codeRetour Tinyint;
 
 BEGIN TRY
 	BEGIN
+		SET @iDcree = -1 ;
 		IF @libellePresse IS NULL OR @libellePresse = ''
 		BEGIN
 			SET @codeRetour = 1 ;
@@ -33,6 +34,7 @@ BEGIN TRY
 			INSERT INTO Machine (libellePresse, enService) VALUES (@libellePresse, 1);
 			SET @codeRetour = 0 ;
 			SET @messageRetour = 'Machine ajouté dans la table avec succès.';
+			SET @iDcree = (SELECT idPresse FROM MACHINE WHERE libellePresse = @libellePresse) ;
 		END
 	END
 END TRY
