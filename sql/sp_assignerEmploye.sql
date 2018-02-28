@@ -6,7 +6,7 @@ go
 -- @role est le nom systeme du role a affecter. Un employé ne peut etre affecté qu'à un seul role.
 -- Si @role vaut NULL, l'employe n'est plus affecté à aucun role, et l'utilisateur de base de donnée correspondant est supprimé.
 -- retourne 0 lorsque l'opération est un succès
-ALTER PROCEDURE assignerEmploye
+ALTER PROCEDURE sp_assignerEmploye
 (
 	@employe sysname,
 	@role sysname,
