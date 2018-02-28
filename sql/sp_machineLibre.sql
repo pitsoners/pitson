@@ -2,16 +2,13 @@ use Pitson
 go
 
 --===============================================================================
--- Procedure qui permet de verifier si il y a des machines libres
+-- View qui permet de verifier si il y a des machines libres
 --===============================================================================
 
-CREATE Procedure sp_machineLibre
+CREATE view MachinesLibres
 AS
-BEGIN
 
-SELECT *
+SELECT idPresse, libellePresse
 FROM Machine
 Where enService = 1 
 AND NOT EXISTS (SELECT etatProduction FROM Lot Where etatProduction = 'EnCours' AND lot.idPresse = Machine.idPresse)
-
-END
