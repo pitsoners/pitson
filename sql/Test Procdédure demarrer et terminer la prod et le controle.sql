@@ -10,9 +10,7 @@ DECLARE @message varchar (255);
 
 
 /* Test Procédure sp_demarrerProd */
-PRINT 'Test Procédure sp_demarrerProd';
-PRINT '';
-PRINT '';
+PRINT '--------------------Test Procédure sp_demarrerProd----------------------';
 PRINT '';
 
 -- Test @IdLot NULL
@@ -118,9 +116,9 @@ PRINT '';
 
 /********************************************************************************/
 /* Test Procédure sp_demarrerConrtrole */
-PRINT 'Test Procédure sp_demarrerControle';
 PRINT '';
 PRINT '';
+PRINT '-----------------------------Test Procédure sp_demarrerControle----------------------------------';
 PRINT '';
 
 -- Test @IdLot NULL
@@ -164,3 +162,101 @@ PRINT 'Code retour = ' + CAST (@retour as char(1));
 PRINT @message;
 PRINT '';
 
+
+
+/********************************************************************************/
+/* Test Procédure sp_terminerProd */
+PRINT '';
+PRINT '';
+PRINT '--------------------------------Test Procédure sp_terminerProd------------------------------';
+PRINT '';
+
+-- Test @IdLot NULL
+PRINT 'Test @IdLot NULL';
+SET @idLot = NULL;
+
+EXEC @retour = dbo.sp_terminerProd @idLot, @message OUTPUT;
+
+PRINT 'Code retour = ' + CAST (@retour as char(1));
+PRINT @message;
+PRINT '';
+
+-- Test @IdLot = ''
+PRINT 'Test @IdLot = ''''';
+SET @idLot = '';
+SET @idMachine = 1;
+
+EXEC @retour = dbo.sp_terminerProd @idLot, @message OUTPUT;
+
+PRINT 'Code retour = ' + CAST (@retour as char(1));
+PRINT @message;
+PRINT '';
+
+-- Test @IdLot inexistant
+PRINT 'Test @IdLot =  10';
+SET @idLot = 10;
+
+EXEC @retour = dbo.sp_terminerProd @idLot, @message OUTPUT;
+
+PRINT 'Code retour = ' + CAST (@retour as char(1));
+PRINT @message;
+PRINT '';
+
+-- Test @IdLot = 1
+PRINT 'Test @IdLot = 1';
+SET @idLot = 1;
+
+EXEC @retour = dbo.sp_terminerProd @idLot, @message OUTPUT;
+
+PRINT 'Code retour = ' + CAST (@retour as char(1));
+PRINT @message;
+PRINT '';
+
+
+/********************************************************************************/
+/* Test Procédure sp_terminerControle */
+PRINT '';
+PRINT '';
+PRINT '--------------------------------Test Procédure sp_terminerControle------------------------------';
+PRINT '';
+
+-- Test @IdLot NULL
+PRINT 'Test @IdLot NULL';
+SET @idLot = NULL;
+
+EXEC @retour = dbo.sp_terminerControle @idLot, @message OUTPUT;
+
+PRINT 'Code retour = ' + CAST (@retour as char(1));
+PRINT @message;
+PRINT '';
+
+-- Test @IdLot = ''
+PRINT 'Test @IdLot = ''''';
+SET @idLot = '';
+SET @idMachine = 1;
+
+EXEC @retour = dbo.sp_terminerControle @idLot, @message OUTPUT;
+
+PRINT 'Code retour = ' + CAST (@retour as char(1));
+PRINT @message;
+PRINT '';
+
+-- Test @IdLot inexistant
+PRINT 'Test @IdLot =  10';
+SET @idLot = 10;
+
+EXEC @retour = dbo.sp_terminerControle @idLot, @message OUTPUT;
+
+PRINT 'Code retour = ' + CAST (@retour as char(1));
+PRINT @message;
+PRINT '';
+
+-- Test @IdLot = 1
+PRINT 'Test @IdLot = 1';
+SET @idLot = 1;
+
+EXEC @retour = dbo.sp_terminerControle @idLot, @message OUTPUT;
+
+PRINT 'Code retour = ' + CAST (@retour as char(1));
+PRINT @message;
+PRINT '';
