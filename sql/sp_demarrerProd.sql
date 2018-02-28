@@ -31,7 +31,7 @@ AS
 			SET @msg = 'Ce lot n''existe pas';
 		END
 		-- Vérifier que la production n'a pas déjà été lancée
-		ELSE IF EXISTS (
+		ELSE IF NOT EXISTS (
 						SELECT Lot.idLot
 						FROM Lot
 						WHERE Lot.idLot = @IdLot
