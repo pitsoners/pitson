@@ -1,0 +1,141 @@
+USE Pitson
+GO
+
+--===============================================================================
+-- Procedure qui permet de modifier les seuils de tolérance des catégories
+-- @minPetit est le seuil de tolérance mini de la catégorie petit
+-- @maxPetit est le seuil de tolérance maxi de la catégorie petit
+-- @minMoyen est le seuil de tolérance mini de la catégorie moyen
+-- @maxMoyen est le seuil de tolérance maxi de la catégorie moyen
+-- @minGrand est le seuil de tolérance mini de la catégorie grand
+-- @maxGrand est le seuil de tolérance maxi de la catégorie grand
+-- @messageRetour est le message retour
+-- Code retour :
+--			0. OK
+--			1. Paramètre d'entrée à valeur nulle
+--			2. Conflit / incohérence entre les bornes
+--			3. Seuils de tolérance verrouillés
+--			4. Erreur base de donnée
+--===============================================================================
+CREATE PROC sp_modifierBornesCategories @minPetit TypeMesure, @maxPetit TypeMesure, @minMoyen TypeMesure, @maxMoyen TypeMesure, @minGrand TypeMesure, @maxGrand TypeMesure, @messageRetour TypeMessageRetour output
+AS
+DECLARE @codeRetour TINYINT ;
+BEGIN TRY
+	BEGIN
+		IF EXISTS (SELECT * FROM Lot)
+		BEGIN
+			SET @codeRetour = 3 ;
+			SET @messageRetour = 'Des lots on déjà été créés, les seuils de tolérance des catégories sont maintenant verrouillées.';
+		END
+		ELSE IF @minPetit = NULL
+		BEGIN
+			SET @codeRetour = 1 ;
+			SET @messageRetour = 'La borne minimum de la catégorie petit est nulle.';
+		END
+		ELSE IF @maxPetit = NULL
+		BEGIN
+			SET @codeRetour = 1 ;
+			SET @messageRetour = 'La borne maximum de la catégorie petit est nulle.';
+		END
+		ELSE IF @minMoyen = NULL
+		BEGIN
+			SET @codeRetour = 1 ;
+			SET @messageRetour = 'La borne minimum de la catégorie moyen est nulle.';
+		END
+		ELSE IF @maxMoyen = NULL
+		BEGIN
+			SET @codeRetour = 1 ;
+			SET @messageRetour = 'La borne maximum de la catégorie moyen est nulle.';
+		END
+		ELSE IF @minGrand = NULL
+		BEGIN
+			SET @codeRetour = 1 ;
+			SET @messageRetour = 'La borne minimum de la catégorie grand est nulle.';
+		END
+		ELSE IF @maxGrand = NULL
+		BEGIN
+			SET @codeRetour = 1 ;
+			SET @messageRetour = 'La borne maximum de la catégorie grand est nulle.';
+		END
+		ELSE IF @minPetit >= @maxPetit
+		BEGIN
+			SET @codeRetour = 2 ;
+			SET @messageRetour = 'La borne maximum de la catégorie petit est inférieure à sa borne minimum.';
+		END
+		ELSE IF @minMoyen >= @maxMoyen
+		BEGIN
+			SET @codeRetour = 2 ;
+			SET @messageRetour = 'La borne maximum de la catégorie moyen est inférieure à sa borne minimum.';
+		END
+		ELSE IF @minGrand >= @maxGrand
+		BEGIN
+			SET @codeRetour = 2 ;
+			SET @messageRetour = 'La borne maximum de la catégorie grand est inférieure à sa borne minimum.';
+		END
+		ELSE IF @minPetit >= @minMoyen
+		BEGIN
+			SET @codeRetour = 2 ;
+			SET @messageRetour = 'La borne minimum de la catégorie petit est supérieure à la borne minimum de la catégorie moyen.';
+		END
+		ELSE IF @maxMoyen >= @maxGrand
+		BEGIN
+			SET @codeRetour = 2 ;
+			SET @messageRetour = 'La borne maximum de la catégorie moyen est supérieure à la borne maximum de la catégorie grand.';
+		END
+		ELSE IF @minMoyen > @maxPetit
+		BEGIN
+			SET @codeRetour = 2 ;
+			SET @messageRetour = 'La borne minimum de la catégorie moyen est strictement supérieure à la borne maximum de la catégorie petit.';
+		END
+		ELSE IF @maxMoyen < @minGrand
+		BEGIN
+			SET @codeRetour = 2 ;
+			SET @messageRetour = 'La borne maximum de la catégorie moyen est strictement inférieure à la borne minimum de la catégorie grand.';
+		END
+		ELSE IF @maxPetit > @minGrand
+		BEGIN
+			SET @codeRetour = 2 ;
+			SET @messageRetour = 'La borne maximum de la catégorie petit est strictement supérieure à la borne minimum de la catégorie grand.';
+		END
+		ELSE
+		BEGIN
+			-- Création des catégories petit, moyen, grand, rebut si elles n'existent pas
+			IF NOT EXISTS (SELECT* FROM Categorie WHERE idCategorie = 'Petit')
+			BEGIN
+				INSERT INTO Categorie (idCategorie) VALUES ('Petit') ;
+			END
+			IF NOT EXISTS (SELECT* FROM Categorie WHERE idCategorie = 'Moyen')
+			BEGIN
+				INSERT INTO Categorie (idCategorie) VALUES ('Moyen') ;
+			END
+			IF NOT EXISTS (SELECT* FROM Categorie WHERE idCategorie = 'Grand')
+			BEGIN
+				INSERT INTO Categorie (idCategorie) VALUES ('Grand') ;
+			END
+			IF NOT EXISTS (SELECT* FROM Categorie WHERE idCategorie = 'Rebut')
+			BEGIN
+				INSERT INTO Categorie (idCategorie) VALUES ('Rebut') ;
+			END
+
+			-- Affectation des valeurs des seuils de tolérance
+			UPDATE Categorie
+			SET toleranceMini = @minPetit, toleranceMaxi = @maxPetit
+			WHERE idCategorie = 'Petit';
+			UPDATE Categorie
+			SET toleranceMini = @minMoyen, toleranceMaxi = @maxMoyen
+			WHERE idCategorie = 'Moyen';
+			UPDATE Categorie
+			SET toleranceMini = @minGrand, toleranceMaxi = @maxGrand
+			WHERE idCategorie = 'Grand';
+
+			SET @codeRetour = 0 ;
+			SET @messageRetour = 'Les valeurs des seuils de tolérances ont été mis à jour.';
+		END
+	END
+END TRY
+BEGIN CATCH
+	SET @codeRetour = 4 ;
+	SET @messageRetour = 'Erreur base de données : ' + ERROR_MESSAGE() ;
+END CATCH
+RETURN @codeRetour ;
+GO
