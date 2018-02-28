@@ -10,21 +10,21 @@
 						3 => Erreur base de donnée (Exception)
 -- Sortie : @mes = Contient le message d'erreur ou de réussite 
 -- =============================================================*/
-CREATE PROC Lancer_Prod (@IdLot int, @msg varchar(250) OUTPUT)
+CREATE PROC sp_demarrerProd (@idLot int, @msg varchar(250) OUTPUT)
 AS
 	DECLARE @retour int;
 	BEGIN TRY
 		-- Verification que les données ne sont pas null
-		IF @IdLot IS NULL OR @IdLot = ''
+		IF @idLot IS NULL OR @idLot = ''
 		BEGIN
 			SET @retour = 1;
 			SET @msg = 'Id du lot manquant';
 		END
 		-- Verification de l'existance du lot
 		ELSE IF NOT EXISTS (
-							SELECT Lot.IdLot
+							SELECT Lot.idLot
 							FROM Lot
-							WHERE Lot.IdLot = @IdLot
+							WHERE Lot.idLot = @idLot
 							)
 		BEGIN
 			SET @retour = 2;
@@ -32,10 +32,10 @@ AS
 		END
 		-- Vérifier que la production n'a pas déjà été lancée
 		ELSE IF EXISTS (
-						SELECT Lot.IdLot
+						SELECT Lot.idLot
 						FROM Lot
-						WHERE Lot.IdLot = @IdLot
-						AND Lot.EtatProduction = 'Attente'
+						WHERE Lot.idLot = @IdLot
+						AND Lot.etatProduction = 'Attente'
 						)
 		BEGIN 
 			SET @retour = 2;
@@ -43,10 +43,10 @@ AS
 		END
 		-- Verifier que le control n'a pas été lancé
 		ELSE IF NOT EXISTS (
-						SELECT Lot.IdLot 
+						SELECT Lot.idLot 
 						FROM Lot
-						WHERE Lot.IdLot = @IdLot 
-						AND Lot.EtatControl = 'Attente'
+						WHERE Lot.idLot = @IdLot 
+						AND Lot.etatControle = 'Attente'
 						)
 		BEGIN
 			SET @retour = 2;
@@ -55,10 +55,10 @@ AS
 		ELSE 
 		BEGIN
 			UPDATE Lot 
-			SET Lot.EtatProduction = 'EnCour'
-			WHERE Lot.IdLot = @IdLot
+			SET Lot.etatProduction = 'EnCour'
+			WHERE Lot.idLot = @idLot
 			SET @retour = 0;
-			SET @msg = 'Etat de la production mise à jour de Attente à En Cour'
+			SET @msg = 'Etat de la production mise à jour de "Attente" à "En Cour"'
 		END
 	END TRY
 
