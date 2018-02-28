@@ -10,21 +10,22 @@
 						3 => Erreur base de donnée (Exception)
 -- Sortie : @mes = Contient le message d'erreur ou de réussite 
 -- =============================================================*/
-CREATE PROC Terminer_Prod (@IdLot int, @msg varchar(250) OUTPUT)
+
+CREATE PROC sp_terminerProd (@idLot int, @msg varchar(250) OUTPUT)
 AS
 	DECLARE @retour int;
 	BEGIN TRY
 		-- Verification que les données ne sont pas null
-		IF @IdLot IS NULL OR @IdLot = ''
+		IF @idLot IS NULL OR @idLot = ''
 		BEGIN
 			SET @retour = 1;
 			SET @msg = 'Id du lot manquant';
 		END
 		-- Verification de l'existance du lot
 		ELSE IF NOT EXISTS (
-							SELECT Lot.IdLot
+							SELECT Lot.idLot
 							FROM Lot
-							WHERE Lot.IdLot = @IdLot
+							WHERE Lot.idLot = @idLot
 							)
 		BEGIN
 			SET @retour = 2;
@@ -32,11 +33,11 @@ AS
 		END
 		-- Vérifier que la production n'a pas déjà été lancée ou est déjà terminé
 		ELSE IF NOT EXISTS (
-						SELECT Lot.IdLot
+						SELECT Lot.idLot
 						FROM Lot
-						WHERE Lot.IdLot = @IdLot
-						AND Lot.EtatProduction = 'Attente'
-						OR Lot.EtatProduction = 'Termine'
+						WHERE Lot.idLot = @idLot
+						AND Lot.etatProduction = 'Attente'
+						OR Lot.etatProduction = 'Termine'
 						)
 		BEGIN 
 			SET @retour = 2;
@@ -45,8 +46,8 @@ AS
 		ELSE 
 		BEGIN
 			UPDATE Lot 
-			SET Lot.EtatProduction = 'termine'
-			WHERE Lot.IdLot = @IdLot
+			SET Lot.etatProduction = 'termine'
+			WHERE Lot.idLot = @idLot
 			SET @retour = 0;
 			SET @msg = 'Etat de la production mise à jour de En Cour à Terminé'
 		END
