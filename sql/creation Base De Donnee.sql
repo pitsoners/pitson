@@ -155,6 +155,16 @@ CREATE ROLE ResponsableQualite;
 
 GO
 
+/* Table indiquant la version de la base de donnée */
+CREATE TABLE Version
+(
+	id bit PRIMARY KEY CHECK (id = 1) DEFAULT 1,
+	numVersion int
+);
+
+INSErT InTO Version (numVersion) VALUES (1);
+GO
+
 /* Création des vues */
 
 CREATE VIEW LotsAttenteControle
