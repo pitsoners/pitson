@@ -1,0 +1,129 @@
+USE Pitson
+GO
+
+
+-- Programme test pour les procédures machine (creer, renommer, supprimer, changer Statut) --
+
+
+
+DECLARE @idPresse INT ;
+DECLARE @idPressefactice INT ;
+DECLARE @libellePresse TypeNomPresse ;
+DECLARE @nouveauNom TypeNomPresse ;
+DECLARE @enService TINYINT ;
+DECLARE @messageRetour TypeMessageRetour ;
+DECLARE @codeRetour TINYINT ;
+
+
+PRINT 'Test de la procédure créer puis renommer puis changerStatut  puis supprimer :' ;
+
+
+--Test ok
+PRINT 'Test ok';
+SET @libellePresse = 'test' ;
+SET @nouveauNom = 'testrenomme' ;
+SET @enService = 0 ;
+
+EXEC @codeRetour = dbo.sp_creerMachine @libellePresse, @idPresse output, @messageRetour output ;
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+PRINT 'IdPresse : ' + CAST(@idPresse as varchar(2)) ;
+SELECT * FROM Machine
+
+-- Test creer machine libellepresse existant
+PRINT 'Test creer machine libellepresse existant' ;
+EXEC @codeRetour = dbo.sp_creerMachine @libellePresse, @idPressefactice output, @messageRetour output ;
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+PRINT 'IdPresse : ' + CAST(@idPressefactice as varchar(2)) ;
+
+-- Test creer machine libellepresse null
+PRINT 'Test creer machine libellepresse null' ;
+EXEC @codeRetour = dbo.sp_creerMachine NULL, @idPressefactice output, @messageRetour output ;
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+PRINT 'IdPresse : ' + CAST(@idPressefactice as varchar(2)) ;
+
+-- Test creer machine libellepresse vide
+PRINT 'Test creer machine libellepresse vide' ;
+EXEC @codeRetour = dbo.sp_creerMachine '', @idPressefactice output, @messageRetour output ;
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+PRINT 'IdPresse : ' + CAST(@idPressefactice as varchar(2)) ;
+
+-- Test renommer ok
+PRINT 'Test renommer ok :';
+EXEC @codeRetour = dbo.sp_renommerMachine @idPresse, @nouveauNom, @messageRetour output ;
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+SELECT * FROM Machine
+
+-- Test renommer machine avec un nom null
+PRINT 'Test renommer machine avec un nom null';
+EXEC @codeRetour = dbo.sp_renommerMachine @idPresse, NULL, @messageRetour output ;
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+
+-- Test renommer machine avec un nom vide
+PRINT 'Test renommer machine avec un nom vide';
+EXEC @codeRetour = dbo.sp_renommerMachine @idPresse, '', @messageRetour output ;
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+
+-- Test renommer machine inexistante
+PRINT 'Test renommer machine inexistante';
+EXEC @codeRetour = dbo.sp_renommerMachine 1000, @nouveauNom, @messageRetour output ;
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+
+-- Test renommer machine avec un nom existant
+PRINT 'Test renommer machine avec un nom existant';
+EXEC @codeRetour = dbo.sp_renommerMachine @idPresse, @nouveauNom, @messageRetour output ;
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+
+-- Test changer statut ok
+PRINT 'Test changer statut ok' ;
+EXEC @codeRetour = dbo.sp_changerStatutMachine @idPresse, @enService, @messageRetour output ;
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+SELECT * FROM Machine
+
+-- Test changer statut idpresse null
+PRINT 'Test changer statut idpresse null' ;
+EXEC @codeRetour = dbo.sp_changerStatutMachine NULL, @enService, @messageRetour output ;
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+
+-- Test changer statut idpresse inexistant
+PRINT 'Test changer statut idpresse null' ;
+EXEC @codeRetour = dbo.sp_changerStatutMachine 1000, @enService, @messageRetour output ;
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+
+-- Test changer statut @enService incohérent
+PRINT 'Test changer statut @enService incohérent' ;
+EXEC @codeRetour = dbo.sp_changerStatutMachine @idPresse, 5, @messageRetour output ;
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+
+-- Test supprimer machine idPresse null
+PRINT 'Test supprimer machine idPresse null :';
+EXEC @codeRetour = dbo.sp_supprimerMachine NULL, @messageRetour output ;
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+
+-- Test supprimer machine idPresse inexistante
+PRINT 'Test supprimer machine idPresse inexistante :';
+EXEC @codeRetour = dbo.sp_supprimerMachine 1000, @messageRetour output ;
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+
+
+-- Test supprimer machine ok
+PRINT 'Test supprimer machine ok :';
+EXEC @codeRetour = dbo.sp_supprimerMachine @idPresse, @messageRetour output ;
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+SELECT * FROM Machine
+SELECT * FROM Lot
