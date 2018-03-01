@@ -4,6 +4,7 @@ GO
 --===============================================================================
 -- Procedure qui permet de créer une nouvelle machine dans la base
 -- @libellePresse est le nom de la presse de la machine à créer
+-- @idCree en retour est l'id de la machine créée, qui vaut -1 si erreur.
 -- @message est le message retour
 -- Code retour :
 --			0. OK
@@ -140,7 +141,7 @@ BEGIN TRY
 			SET libellePresse = @nouveauNom
 			WHERE idPresse = @idPresseARenommer ;
 			SET @codeRetour = 0 ;
-			SET @messageRetour = 'Modèle renommé avec succès.';
+			SET @messageRetour = 'Presse renommée avec succès.';
 		END
 	END
 END TRY
@@ -162,7 +163,8 @@ GO
 --			0. OK
 --			1. Paramètre d'entrée à valeur nulle ou incohérente
 --			2. Identifiant machine non reconnu
---			3. Exception
+--			3. Machine en cours de production d'un lot
+--			4. Exception
 --===============================================================================
 CREATE PROC sp_changerStatutMachine @idPresse INT, @enService TINYINT, @messageRetour TypeMessageRetour output
 AS
@@ -184,6 +186,11 @@ BEGIN TRY
 		BEGIN
 			SET @codeRetour = 2 ;
 			SET @messageRetour = 'La presse à mettre à jour n''existe pas dans la table.';
+		END
+		ELSE IF EXISTS (SELECT idLot FROM Lot WHERE etatProduction = 'EnCours' AND idPresse = @idPresse)
+		BEGIN
+			SET @codeRetour = 3 ;
+			SET @messageRetour = 'Il y a des lots en cours de production sur cette presse.';
 		END
 		ELSE
 		BEGIN
