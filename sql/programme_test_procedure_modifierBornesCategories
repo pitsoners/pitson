@@ -1,0 +1,267 @@
+USE Pitson
+GO
+
+
+
+-- Programme test pour la procédure sp_modifierBornesCategories
+-- ATTENTION : si des lots sont déjà créés la procédure de test devrait toujours retourner
+-- la même erreur car on ne peut pas changer les catégories dès qu'au moins un lot est produit.
+
+
+DECLARE @minPetit TypeMesure ;
+DECLARE @maxPetit TypeMesure ;
+DECLARE @minMoyen TypeMesure ;
+DECLARE @maxMoyen TypeMesure ;
+DECLARE @minGrand TypeMesure ;
+DECLARE @maxGrand TypeMesure ;
+DECLARE @codeRetour TINYINT ;
+DECLARE @messageRetour TypeMessageRetour;
+DECLARE @idLot INT ;
+
+-- Test avec des lots déjà créés
+PRINT 'Test avec des lots déjà créés' ;
+-- On crée un modele test puis un lot de ce modele
+EXEC dbo.sp_creerModele 'test', 1, @messageRetour output ;
+EXEC dbo.sp_lancerLot 'test', 1, @messageRetour output ;
+SET @idLot = (SELECT idLot FROM Lot WHERE idModele = 'test');
+
+SET @minPetit = -3;
+SET @maxPetit = -1;
+SET @minMoyen = -2;
+SET @maxMoyen = 2;
+SET @minGrand = 1;
+SET @maxGrand = 3;
+
+EXEC @codeRetour = dbo.sp_modifierBornesCategories @minPetit, @maxPetit, @minMoyen, @maxMoyen, @minGrand, @maxGrand, @messageRetour output ;
+
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+PRINT '' ;
+PRINT '' ;
+
+-- On annule le lot test puis on detruit le modele
+EXEC dbo.sp_annulerLot @idLot, @messageRetour output ;
+EXEC dbo.sp_supprimerModele 'test', @messageRetour output ;
+
+
+
+
+-- Tests valeurs NULL
+PRINT 'Test valeurs nulles :';
+
+SET @minPetit = NULL;
+SET @maxPetit = -1;
+SET @minMoyen = -2;
+SET @maxMoyen = 2;
+SET @minGrand = 1;
+SET @maxGrand = 3;
+
+EXEC @codeRetour = dbo.sp_modifierBornesCategories @minPetit, @maxPetit, @minMoyen, @maxMoyen, @minGrand, @maxGrand, @messageRetour output ;
+
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+PRINT '' ;
+PRINT '' ;
+
+
+SET @minPetit = -3;
+SET @maxPetit = NULL;
+SET @minMoyen = -2;
+SET @maxMoyen = 2;
+SET @minGrand = 1;
+SET @maxGrand = 3;
+
+EXEC @codeRetour = dbo.sp_modifierBornesCategories @minPetit, @maxPetit, @minMoyen, @maxMoyen, @minGrand, @maxGrand, @messageRetour output ;
+
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+PRINT '' ;
+PRINT '' ;
+
+
+SET @minPetit = -3;
+SET @maxPetit = -1;
+SET @minMoyen = NULL;
+SET @maxMoyen = 2;
+SET @minGrand = 1;
+SET @maxGrand = 3;
+
+EXEC @codeRetour = dbo.sp_modifierBornesCategories @minPetit, @maxPetit, @minMoyen, @maxMoyen, @minGrand, @maxGrand, @messageRetour output ;
+
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+PRINT '' ;
+PRINT '' ;
+
+
+SET @minPetit = -3;
+SET @maxPetit = -1;
+SET @minMoyen = -2;
+SET @maxMoyen = NULL;
+SET @minGrand = 1;
+SET @maxGrand = 3;
+
+EXEC @codeRetour = dbo.sp_modifierBornesCategories @minPetit, @maxPetit, @minMoyen, @maxMoyen, @minGrand, @maxGrand, @messageRetour output ;
+
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+PRINT '' ;
+PRINT '' ;
+
+
+SET @minPetit = -3;
+SET @maxPetit = -1;
+SET @minMoyen = -2;
+SET @maxMoyen = 2;
+SET @minGrand = NULL;
+SET @maxGrand = 3;
+
+EXEC @codeRetour = dbo.sp_modifierBornesCategories @minPetit, @maxPetit, @minMoyen, @maxMoyen, @minGrand, @maxGrand, @messageRetour output ;
+
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+PRINT '' ;
+PRINT '' ;
+
+
+SET @minPetit = -3;
+SET @maxPetit = -1;
+SET @minMoyen = -2;
+SET @maxMoyen = 2;
+SET @minGrand = 1;
+SET @maxGrand = NULL;
+
+EXEC @codeRetour = dbo.sp_modifierBornesCategories @minPetit, @maxPetit, @minMoyen, @maxMoyen, @minGrand, @maxGrand, @messageRetour output ;
+
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+PRINT '' ;
+PRINT '' ;
+
+
+-- Tests valeurs incohérentes
+PRINT 'Test valeurs incohérentes :';
+
+SET @minPetit = -3;
+SET @maxPetit = -4;
+SET @minMoyen = -2;
+SET @maxMoyen = 2;
+SET @minGrand = 1;
+SET @maxGrand = 3;
+
+EXEC @codeRetour = dbo.sp_modifierBornesCategories @minPetit, @maxPetit, @minMoyen, @maxMoyen, @minGrand, @maxGrand, @messageRetour output ;
+
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+PRINT '' ;
+PRINT '' ;
+
+
+SET @minPetit = -3;
+SET @maxPetit = -1;
+SET @minMoyen = -2;
+SET @maxMoyen = -3;
+SET @minGrand = 1;
+SET @maxGrand = 3;
+
+EXEC @codeRetour = dbo.sp_modifierBornesCategories @minPetit, @maxPetit, @minMoyen, @maxMoyen, @minGrand, @maxGrand, @messageRetour output ;
+
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+PRINT '' ;
+PRINT '' ;
+
+
+SET @minPetit = -3;
+SET @maxPetit = -1;
+SET @minMoyen = -2;
+SET @maxMoyen = 2;
+SET @minGrand = 1;
+SET @maxGrand = 0;
+
+EXEC @codeRetour = dbo.sp_modifierBornesCategories @minPetit, @maxPetit, @minMoyen, @maxMoyen, @minGrand, @maxGrand, @messageRetour output ;
+
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+PRINT '' ;
+PRINT '' ;
+
+
+SET @minPetit = -3;
+SET @maxPetit = -2;
+SET @minMoyen = -1;
+SET @maxMoyen = 2;
+SET @minGrand = 1;
+SET @maxGrand = 3;
+
+EXEC @codeRetour = dbo.sp_modifierBornesCategories @minPetit, @maxPetit, @minMoyen, @maxMoyen, @minGrand, @maxGrand, @messageRetour output ;
+
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+PRINT '' ;
+PRINT '' ;
+
+
+SET @minPetit = -3;
+SET @maxPetit = -1;
+SET @minMoyen = -2;
+SET @maxMoyen = 1;
+SET @minGrand = 2;
+SET @maxGrand = 3;
+
+EXEC @codeRetour = dbo.sp_modifierBornesCategories @minPetit, @maxPetit, @minMoyen, @maxMoyen, @minGrand, @maxGrand, @messageRetour output ;
+
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+PRINT '' ;
+PRINT '' ;
+
+
+SET @minPetit = -3;
+SET @maxPetit = 1;
+SET @minMoyen = -2;
+SET @maxMoyen = 2;
+SET @minGrand = 0;
+SET @maxGrand = 3;
+
+EXEC @codeRetour = dbo.sp_modifierBornesCategories @minPetit, @maxPetit, @minMoyen, @maxMoyen, @minGrand, @maxGrand, @messageRetour output ;
+
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+PRINT '' ;
+PRINT '' ;
+
+
+SET @minPetit = -3;
+SET @maxPetit = -2;
+SET @minMoyen = -1;
+SET @maxMoyen = 2;
+SET @minGrand = 1;
+SET @maxGrand = 3;
+
+EXEC @codeRetour = dbo.sp_modifierBornesCategories @minPetit, @maxPetit, @minMoyen, @maxMoyen, @minGrand, @maxGrand, @messageRetour output ;
+
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+PRINT '' ;
+PRINT '' ;
+
+
+SET @minPetit = -3;
+SET @maxPetit = -1;
+SET @minMoyen = -2;
+SET @maxMoyen = 1;
+SET @minGrand = 2;
+SET @maxGrand = 3;
+
+EXEC @codeRetour = dbo.sp_modifierBornesCategories @minPetit, @maxPetit, @minMoyen, @maxMoyen, @minGrand, @maxGrand, @messageRetour output ;
+
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+PRINT '' ;
+PRINT '' ;
+
+
+SELECT * FROM Categorie
+
+
