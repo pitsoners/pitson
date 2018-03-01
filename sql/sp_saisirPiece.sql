@@ -85,9 +85,11 @@ BEGIN
 						ELSE
 							BEGIN
 								DECLARE @cat TypeCategorie;
+								DECLARE @tab TABLE (idPiece int);
 								EXECUTE dbo.sp_categoriePiece @ht, @hl,@bt, @bl, @defautVisuel, @cat OUTPUT;
 								INSERT INTO Piece (idLot, dimensionHT, dimensionHL, dimensionBT, dimensionBL, defautVisuel, commentaire, idCategorie)
-									OUTPUT INSERTED.idPiece VALUES (@idLot, @ht, @hl, @bt, @bl, @defautVisuel, @commentaire, @cat);
+									OUTPUT INSERTED.idPiece INTO @tab VALUES (@idLot, @ht, @hl, @bt, @bl, @defautVisuel, @commentaire, @cat);
+								SELECT @idPiece = idPiece FROM @tab;
 								SET @codeRetour = 0;
 								SET @messageRetour = 'Pièce saisie avec succès.';
 							END
@@ -104,14 +106,16 @@ GO
 
 DECLARE @code int;
 DECLARE @msg TypeMessageRetour;
+DECLARE @idPiece int;
 
-EXECUTE @code = sp_saisirPiece 2, -2.5,-1.2,-2.3,-1.4,0, NULL, @msg OUTPUT;
+EXECUTE @code = sp_saisirPiece 2, -2.5,-1.2,-2.3,-1.4,0, NULL, @idPiece OUTPUT, @msg OUTPUT;
 PRINT 'Saisir piece : ' + convert(varchar(3), @code) + ' - ' + @msg;
 
-EXECUTE @code = sp_saisirPiece 2, 2,0,3,0,0, NULL, @msg OUTPUT;
+EXECUTE @code = sp_saisirPiece 2, 2,0,3,0,0, NULL, @idPiece OUTPUT,@msg OUTPUT;
 PRINT 'Saisir piece : ' + convert(varchar(3), @code) + ' - ' + @msg;
 
-EXECUTE @code = sp_saisirPiece 2, 0,0,0,0,1, NULL, @msg OUTPUT;
+EXECUTE @code = sp_saisirPiece 2, 0,0,0,0,1, NULL, @idPiece OUTPUT,@msg OUTPUT;
 PRINT 'Saisir piece : ' + convert(varchar(3), @code) + ' - ' + @msg;
+
 
 SELECT * FROM Piece
