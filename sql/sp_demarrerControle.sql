@@ -35,11 +35,11 @@ AS
 							SELECT Lot.idLot
 							FROM Lot
 							WHERE Lot.idLot = @IdLot
-							AND Lot.etatProduction = 'Attente'
+							AND Lot.etatProduction = 'EnCours'
 							)
 		BEGIN 
 			SET @retour = 2;
-			SET @msg = 'La production de ce lot est déjà lancée';
+			SET @msg = 'La production de ce lot n''est pas lancée ';
 		END
 		-- Verifier que le control n'a pas été lancé
 		ELSE IF EXISTS (
@@ -55,7 +55,7 @@ AS
 		ELSE 
 		BEGIN
 				UPDATE Lot 
-				SET Lot.etatControle = 'EnCour'
+				SET Lot.etatControle = 'EnCours'
 				WHERE Lot.idLot = @IdLot
 				SET @retour = 0;
 				SET @msg = 'Etat du control mise à jour de Attente à En Cour'
