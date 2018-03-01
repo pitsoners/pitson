@@ -99,7 +99,7 @@ AS
 		END
 		ELSE
 		BEGIN
-			SELECT Piece.IdPiece
+			SELECT *
 			FROM Piece
 			JOIN Lot ON Piece.idLot = Lot.idLot
 			WHERE Lot.idLot = @idLot
