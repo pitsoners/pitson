@@ -51,7 +51,8 @@ BEGIN
 END
 GO
 
-
+DECLARE @code int;
+DECLARE @msg TypeMessageRetour;
 
 EXECUTE @code = sp_annulerLot 1, @msg OUTPUT;
 PRINT 'AnnulerLot' + convert(varchar(3), @code) + ' - ' + @msg;
