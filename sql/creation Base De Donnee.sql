@@ -532,10 +532,6 @@ BEGIN
 END
 GO
 
-USE Pitson;
-go
-
-
 /**********************************************************************************************************************************
  * affecte un employé à un role. crée l'utilisateur dans la base de donnée et l'affecte au rôle donné.                            *
  * @employe est le nom systeme de login à affecter                                                                                *
@@ -769,9 +765,6 @@ AS
 	END CATCH
 	RETURN @retour;
 GO
-
-use Pitson
-go
 
 --===============================================================================
 -- Procedure entrée caisse dans le stock
@@ -1059,10 +1052,6 @@ BEGIN
 	WHERE rm.member_principal_id = DATABASE_PRINCIPAL_ID();
 	RETURN @codeRetour
 END
-
-USE Pitson;
-GO
-
 
 --===============================================================================
 -- Procedure sortie caisse du stock
