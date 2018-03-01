@@ -1,0 +1,306 @@
+USE Pitson
+GO
+
+-- Programme de test des procédures MODELE (creer, renommer, supprimer, changer Statut)
+
+DECLARE @IdModele TypeIDModele ;
+DECLARE @nouveauNom TypeIDModele ;
+DECLARE @diametre TypeMesure ;
+DECLARE @statut TINYINT ;
+DECLARE @messageRetour TypeMessageRetour ;
+DECLARE @codeRetour TINYINT ;
+
+
+-- Test de la procédure créer
+PRINT 'Test de la procédure créer :' ;
+
+--Test OK--
+PRINT 'Test OK :' ;
+SET @IdModele = 'V12' ;
+SET @diametre = 1.335 ;
+
+EXEC @codeRetour = dbo.sp_creerModele @IdModele, @diametre, @messageRetour output ;
+
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+PRINT '' ;
+-- destruction du modele créé
+EXEC dbo.sp_supprimerModele @IdModele, @messageRetour output ;
+
+--Test @IdModele NULL--
+PRINT 'Test @IdModele NULL :' ;
+SET @IdModele = NULL ;
+SET @diametre = 1.335 ;
+
+EXEC @codeRetour = dbo.sp_creerModele @IdModele, @diametre, @messageRetour output ;
+
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+PRINT '' ;
+
+--Test @IdModele vide--
+PRINT 'Test @IdModele vide :' ;
+SET @IdModele = '' ;
+SET @diametre = 1.335 ;
+
+EXEC @codeRetour = dbo.sp_creerModele @IdModele, @diametre, @messageRetour output ;
+
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+PRINT '' ;
+
+--Test @IdModele existant--
+PRINT 'Test @IdModele existant :' ;
+SET @IdModele = 'V8' ;
+SET @diametre = 1.335 ;
+
+EXEC @codeRetour = dbo.sp_creerModele @IdModele, @diametre, @messageRetour output ;
+EXEC @codeRetour = dbo.sp_creerModele @IdModele, @diametre, @messageRetour output ;
+
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+PRINT '' ;
+-- destruction du modèle créé
+EXEC dbo.sp_supprimerModele @IdModele, @messageRetour output ;
+
+--Test @diametre incohérent--
+PRINT 'Test @diametre incohérent :' ;
+SET @IdModele = 'V8' ;
+SET @diametre = -1 ;
+
+EXEC @codeRetour = dbo.sp_creerModele @IdModele, @diametre, @messageRetour output ;
+
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+PRINT '' ;
+
+
+
+-- Test de la procédure supprimer
+PRINT 'Test de la procédure supprimer :' ;
+
+--Test OK--
+PRINT 'Test OK :' ;
+SET @IdModele = 'test' ;
+
+EXEC @codeRetour = dbo.sp_creerModele @IdModele, 1.335, @messageRetour output ;
+EXEC @codeRetour = dbo.sp_supprimerModele @IdModele, @messageRetour output ;
+
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+PRINT '' ;
+
+--Test lots affectes au modele--
+DECLARE @idLot INT ;
+PRINT 'Test lots affectés au modele :' ;
+SET @IdModele = 'test' ;
+
+EXEC @codeRetour = dbo.sp_creerModele @IdModele, 1.335, @messageRetour output ;
+EXEC dbo.sp_lancerLot @idModele, 1, @messageRetour output ;
+SET @idLot = (SELECT idLot FROM Lot WHERE idModele = @IdModele) ;
+EXEC @codeRetour = dbo.sp_supprimerModele @IdModele, @messageRetour output ;
+
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+PRINT '' ;
+
+EXEC dbo.sp_annulerLot @idLot, @messageRetour output ;
+EXEC @codeRetour = dbo.sp_supprimerModele @IdModele, @messageRetour output ;
+
+
+--Test @IdModele NULL--
+PRINT 'Test @IdModele NULL :' ;
+SET @IdModele = NULL ;
+
+EXEC @codeRetour = dbo.sp_supprimerModele @IdModele, @messageRetour output ;
+
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+PRINT '' ;
+
+--Test @IdModele vide--
+PRINT 'Test @IdModele vide :' ;
+SET @IdModele = '' ;
+
+EXEC @codeRetour = dbo.sp_supprimerModele @IdModele, @messageRetour output ;
+
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+PRINT '' ;
+
+--Test @IdModele inexistant--
+PRINT 'Test @IdModele inexistant :' ;
+SET @IdModele = 'V888' ;
+
+EXEC @codeRetour = dbo.sp_supprimerModele @IdModele, @messageRetour output ;
+
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+PRINT '' ;
+PRINT '' ;
+PRINT '' ;
+
+
+
+
+-- Test de la procédure renommer
+PRINT 'Test de la procédure renommer :' ;
+
+--Test OK--
+EXEC dbo.sp_creerModele 'test', 1.025, @messageRetour output ;
+PRINT 'Test OK :' ;
+SET @IdModele = 'test' ;
+SET @nouveauNom = 'test 2' ;
+
+EXEC @codeRetour = dbo.sp_renommerModele @IdModele, @nouveauNom, @messageRetour output ;
+
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+PRINT '' ;
+
+--Test @IdModele NULL--
+PRINT 'Test @IdModele NULL :' ;
+SET @IdModele = NULL ;
+SET @nouveauNom = 'test 2' ;
+
+EXEC @codeRetour = dbo.sp_renommerModele @IdModele, @nouveauNom, @messageRetour output ;
+
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+PRINT '' ;
+
+--Test @IdModele vide--
+PRINT 'Test @IdModele vide :' ;
+SET @IdModele = '' ;
+SET @nouveauNom = 'test 2' ;
+
+EXEC @codeRetour = dbo.sp_renommerModele @IdModele, @nouveauNom, @messageRetour output ;
+
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+PRINT '' ;
+
+--Test @IdModele inexistant--
+PRINT 'Test @IdModele inexistant :' ;
+SET @IdModele = 'dsgfrfr6465gr46de54g56d4rg87' ;
+SET @nouveauNom = 'test 2' ;
+
+EXEC @codeRetour = dbo.sp_renommerModele @IdModele, @nouveauNom, @messageRetour output ;
+
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+PRINT '' ;
+
+
+EXEC dbo.sp_creerModele 'test', 1.025, @messageRetour output ;
+--Test @nouveauNom NULL--
+PRINT 'Test @nouveauNom NULL :' ;
+SET @IdModele = 'test' ;
+SET @nouveauNom = NULL ;
+
+EXEC @codeRetour = dbo.sp_renommerModele @IdModele, @nouveauNom, @messageRetour output ;
+
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+PRINT '' ;
+
+--Test @nouveauNom vide--
+PRINT 'Test @nouveauNom vide :' ;
+SET @IdModele = 'test' ;
+SET @nouveauNom = '' ;
+
+EXEC @codeRetour = dbo.sp_renommerModele @IdModele, @nouveauNom, @messageRetour output ;
+
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+PRINT '' ;
+
+--Test @nouveauNom existant--
+PRINT 'Test @nouveauNom existant :' ;
+SET @IdModele = 'test' ;
+SET @nouveauNom = 'test' ;
+
+EXEC @codeRetour = dbo.sp_renommerModele @IdModele, @nouveauNom, @messageRetour output ;
+
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+PRINT '' ;
+-- Suppression du modele renommé
+EXEC dbo.sp_supprimerModele 'test 2', @messageRetour output ;
+EXEC dbo.sp_supprimerModele 'test', @messageRetour output ;
+
+
+
+
+-- Test de la procédure changerStatut
+PRINT 'Test de la procédure changerStatut :' ;
+
+
+--Test OK--
+PRINT 'Test OK :' ;
+SET @IdModele = 'V8' ;
+SET @statut = 1 ;
+
+EXEC @codeRetour = dbo.sp_changerStatutModele @IdModele, @statut, @messageRetour output ;
+
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+PRINT '' ;
+
+--Test @IdModele NULL--
+PRINT 'Test @IdModele NULL :' ;
+SET @IdModele = NULL ;
+SET @statut = 1 ;
+
+EXEC @codeRetour = dbo.sp_changerStatutModele @IdModele, @statut, @messageRetour output ;
+
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+PRINT '' ;
+
+--Test @IdModele vide--
+PRINT 'Test @IdModele vide :' ;
+SET @IdModele = '' ;
+SET @statut = 1 ;
+
+EXEC @codeRetour = dbo.sp_changerStatutModele @IdModele, @statut, @messageRetour output ;
+
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+PRINT '' ;
+
+--Test @IdModele inexistant--
+PRINT 'Test @IdModele inexistant :' ;
+SET @IdModele = 'V36' ;
+SET @statut = 1 ;
+
+EXEC @codeRetour = dbo.sp_changerStatutModele @IdModele, @statut, @messageRetour output ;
+
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+PRINT '' ;
+
+--Test @statut NULL--
+PRINT 'Test @statut NULL- :' ;
+SET @IdModele = 'V8' ;
+SET @statut = NULL ;
+
+EXEC @codeRetour = dbo.sp_changerStatutModele @IdModele, @statut, @messageRetour output ;
+
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+PRINT '' ;
+
+--Test @statut incohérent--
+PRINT 'Test @statut incohérent :' ;
+SET @IdModele = 'V8' ;
+SET @statut = 3 ;
+
+EXEC @codeRetour = dbo.sp_changerStatutModele @IdModele, @statut, @messageRetour output ;
+
+PRINT 'Code retour : ' + CAST(@codeRetour as char(1)) ;
+PRINT @messageRetour ;
+PRINT '' ;
+
+
+SELECT * FROM MODELE
