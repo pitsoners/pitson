@@ -55,7 +55,7 @@ AS
 		ELSE 
 		BEGIN
 			UPDATE Lot 
-			SET Lot.etatControle = 'termine'
+			SET Lot.etatControle = 'Termine'
 			WHERE Lot.idLot = @IdLot
 			SET @retour = 0;
 			SET @msg = 'Etat du controle mis à jour de "En Cour" à "Terminé" '
