@@ -13,7 +13,7 @@
 USE Pitson
 GO
 
-ALTER PROC sp_demarrerProd (@idLot int, @idMachine int, @msg varchar(250) OUTPUT)
+CREATE PROC sp_demarrerProd (@idLot int, @idMachine int, @msg varchar(250) OUTPUT)
 AS
 	DECLARE @retour int;
 	BEGIN TRY
