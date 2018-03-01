@@ -7,15 +7,6 @@ GO
 USE Pitson;
 GO
 
-/* Création des rôles */
-
-CREATE ROLE ResponsableApplication;
-CREATE ROLE ResponsableAtelier;
-CREATE ROLE ResponsablePresse;
-CREATE ROLE Controleur;
-CREATE ROLE Magasinier;
-CREATE ROLE ResponsableQualite;
-
 /* Création des types */
 
 /* type mesures (utilisé pour les mesures dans PIECE, les marges de tolérance dans CATEGORIES, le diamètre dans MODELE */
