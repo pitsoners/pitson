@@ -155,14 +155,15 @@ CREATE ROLE ResponsableQualite;
 
 GO
 
-/* Table indiquant la version de la base de donnée */
-CREATE TABLE Version
+/* Information generale sur la base de donnée */
+CREATE TABLE InfoBase
 (
 	id bit PRIMARY KEY CHECK (id = 1) DEFAULT 1,
-	numVersion int
+	numVersion int NOT NULL,
+	nombreDePiecesParCaisse int NOT NULL
 );
 
-INSErT InTO Version (numVersion) VALUES (1);
+INSErT InTO InfoBase(numVersion, nombreDePiecesParCaisse) VALUES (1, 40);
 GO
 
 /* Création des vues */
