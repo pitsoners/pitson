@@ -1954,6 +1954,114 @@ BEGIN
 END
 GO
 
+/*-- ==========================================================
+-- Author:		Grégoire BRUN
+-- Create date: 02/03/2018
+-- Description: Permet de donner pour une presse et un modèle les stat réduit sur une periode 
+-- @idPresse : Id de la presse dont on veut récupérer les stats 
+-- @idModele : Id du modèle dont on veut récupérer les stats sur la pièce
+-- @dateDebut : Date à partir de laquelle on veut concidérer les pièces
+-- @dateFin : Date jusqu'à laquelle on veut concidérer les pièves 
+-- @retour = Retourne	0 => Ok
+						1 => Le champ n'a pas été renseigné
+						2 => N'éxiste pas 
+						3 => Erreur base de donnée (Exception)
+-- Sortie : @mes = Contient le message d'erreur ou de réussite 
+-- =============================================================*/
+USE Pitson
+Go 
+
+CREATE PROC sp_statPresse (@idPresse int, @idModele TypeIDModele, @dateDebut datetime, @dateFin datetime, @msg varchar(250) OUTPUT)
+AS
+	DECLARE @retour int;
+	BEGIN TRY
+		-- Verification que les données ne sont pas null
+		IF @idPresse IS NULL OR @idPresse = ''
+		BEGIN
+			SET @retour = 1;
+			SET @msg = 'Id de la presse manquante';
+		END
+		-- Verification de l'existance de la machine
+		ELSE IF NOT EXISTS (
+							SELECT Machine.idPresse
+							FROM Machine
+							WHERE Machine.idPresse = @idPresse
+							)
+		BEGIN
+			SET @retour = 2;
+			SET @msg = 'Cette presse n''existe pas';
+		END 
+		-- Verification que les données ne sont pas null
+		ELSE IF @idModele IS NULL OR @idModele = ''
+		BEGIN
+			SET @retour = 1;
+			SET @msg = 'Id du modèle manquant';
+		END
+		-- Verification de l'existance de la machine
+		ELSE IF NOT EXISTS (
+							SELECT Modele.idModele
+							FROM Modele
+							WHERE Modele.idModele = @idModele
+							)
+		BEGIN
+			SET @retour = 2;
+			SET @msg = 'Ce modèle n''existe pas';
+		END
+		-- Verification qu'il existe un lot pour ce model 
+		ELSE IF NOT EXISTS (
+							SELECT Lot.idLot
+							FROM Lot
+							WHERE Lot.idModele = @idModele
+							)
+		BEGIN
+			SET @retour = 1;
+			SET @msg = 'Il n''existe aucun lot pour ce modèle !'
+		END
+		-- Verification que les données ne sont pas null
+		IF @dateDebut IS NULL OR @dateDebut = ''
+		BEGIN
+			SET @retour = 1;
+			SET @msg = 'Date de début manquante';
+		END
+		-- Verificatrion que les données ne sont pas null
+		ELSE IF @dateFin IS NULL OR @dateFin = ''
+		BEGIN
+			SET @retour = 1;
+			SET @msg = 'Date de fin manquante' ;
+		END
+		-- Verification que la date de début ou de fin n'est pas plus ancienne que la date du jour 
+		ELSE IF @dateFin > GETDATE() OR @dateDebut > GETDATE()
+		BEGIN
+			SET @retour = 1;
+			SET @msg = 'Saisie d''une date invalide, on ne peut pas demander une date plus qui n''est pas encore passée';
+		END
+		-- Vérification que la date de fin est plus récente que la date de début 
+		ELSE IF @dateDebut > @dateFin
+		BEGIN
+			SET @retour = 1;
+			SET @msg = 'Une date de Fin ne peut pas être avant une date de début !';
+		END
+		ELSE 
+		BEGIN
+			SELECT Lot.idLot, Lot.moyenneHL, Lot.moyenneHT, Lot.moyenneBL, Lot.moyenneBT, Lot.miniHL, Lot.miniHT, Lot.miniBL, Lot.miniBT, Lot.maxiHL, Lot.maxiHT, Lot.maxiBL, Lot.maxiBT, Lot.ecartTypeHL, Lot.ecartTypeHT, Lot.ecartTypeBL, Lot.ecartTypeBL 
+			FROM Lot
+			WHERE Lot.dateProduction >= @dateDebut
+			AND Lot.dateProduction <= @dateFin
+			AND Lot.etatControle = 'Termine'
+			AND Lot.idModele = @idModele
+			AND Lot.idPresse = @idPresse
+			SET @retour = 0;
+			SET @msg = 'Voici les statistiques demandées !';
+		END
+	END TRY
+
+		BEGIN CATCH
+			SET @retour = 3;
+			SET @msg = 'Exception' + ERROR_MESSAGE();
+	END CATCH
+	RETURN @retour;
+GO
+
 /* Trigger de mise à jour du cumul */
 
 CREATE TRIGGER tr_incrementerCumul ON Piece
