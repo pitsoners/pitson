@@ -22,9 +22,8 @@ public class Machine {
      */
     public Machine(int idPresse, String libellePresse, boolean enService)
     {
+        this(libellePresse, enService) ;
         setIdPresse(idPresse);
-        setLibellePresse(libellePresse);
-        setEnService(enService);
     }
     
     /**
