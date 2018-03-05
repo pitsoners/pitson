@@ -61,6 +61,10 @@ public class Machine {
         this.m_EnService = enService;
     }
     
+    @Override
+    public String toString() {
+        return "Numéro presse : " + this.getIdPresse() + ", libellé presse : " + this.getLibellePresse() + ", en service : " + this.isEnService() ;
+    }
     
     
 }
