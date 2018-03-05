@@ -14,7 +14,7 @@ public class Lot
     private int idPresse;           // le numéro de la presse
     
     /**
-     * Constructeur à utiliser quand..........
+     * Constructeur à utiliser quand on crée un lot dans l'application en attendant de le mettre dans la base de données
      * @param idModele
      * @param etatProduction
      * @param etatControle
@@ -29,7 +29,7 @@ public class Lot
     }
     
     /**
-     * Constructeur à utiliser quand..............
+     * Constructeur à utiliser quand on crée un lot en attente à partir de la base de données
      * @param idLot
      * @param idModele
      * @param etatProduction
@@ -43,7 +43,7 @@ public class Lot
     }
     
     /**
-     * Constructeur à utiliser quand......
+     * Constructeur à utiliser quand on crée un lot en cours de production à partir de la base de données
      * @param idPresse
      * @param idLot
      * @param idModele
