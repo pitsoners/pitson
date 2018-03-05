@@ -45,4 +45,9 @@ public class Modele {
         this.m_Obsolete = obsolete;
     }
     
+    @Override
+    public String toString() {
+        return "Nom : " + this.getIdModele() + ", diamètre : " + this.getDiametre() + ", obsolete : " + this.isObsolete() ;
+    }
+    
 }
