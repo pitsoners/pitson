@@ -168,7 +168,7 @@ public class ManagerModele {
             cs.registerOutParameter(1, java.sql.Types.TINYINT);
             cs.registerOutParameter(4, java.sql.Types.VARCHAR);
             cs.setString(2, mo.getIdModele());
-            cs.setInt(3, (mo.isObsolete() ? 1 : 0));
+            cs.setInt(3, (obsolete ? 1 : 0));
             cs.executeUpdate();
             if (cs.getByte(1) != 0)
             {
