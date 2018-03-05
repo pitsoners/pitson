@@ -436,30 +436,23 @@ public class FrameResponsableApplication extends javax.swing.JFrame {
     private javax.swing.JTextField textfieldToleranceSuperieurePetit;
     // End of variables declaration//GEN-END:variables
     
+    
     /**
      * Cette méthode permet d'afficher dans les champs texte les dimenstions des catégories 
      * stockés dans la base de donnée
      */
     private void setCategorie()
     {
-        ArrayList<Categorie> liste = ManagerCategorie.getCategorie(); // ArrayList dans laquelle on va travailler 
-        for(Categorie c : liste)
-        {
-            if("Petit".equals(c.getNomCategorie()))
-            {
-                textfieldToleranceInferieurePetit.setText("" + c.getMinCategorie());
-                textfieldToleranceSuperieurePetit.setText("" + c.getMaxCategorie());
-            }
-            else if("Moyen".equals(c.getNomCategorie()))
-            {
-                textfieldToleranceInferieureMoyen.setText("" + c.getMinCategorie());
-                textfieldToleranceSuperieureMoyen.setText("" + c.getMaxCategorie());
-            }
-            else
-            {
-                textfieldToleranceInferieureGrand.setText("" + c.getMinCategorie());
-                textfieldToleranceSuperieureGrand.setText("" + c.getMaxCategorie());
-            }
-        }
+        Categorie c =  ManagerCategorie.getCategorie("Petit");
+        textfieldToleranceInferieurePetit.setText("" + c.getMinCategorie());
+        textfieldToleranceSuperieurePetit.setText("" + c.getMaxCategorie());
+
+         c =  ManagerCategorie.getCategorie("Moyen");
+        textfieldToleranceInferieureMoyen.setText("" + c.getMinCategorie());
+        textfieldToleranceSuperieureMoyen.setText("" + c.getMaxCategorie());
+
+         c =  ManagerCategorie.getCategorie("Grand");
+        textfieldToleranceInferieureGrand.setText("" + c.getMinCategorie());
+        textfieldToleranceSuperieureGrand.setText("" + c.getMaxCategorie());       
     }
 }
