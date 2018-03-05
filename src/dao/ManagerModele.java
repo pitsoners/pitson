@@ -30,7 +30,7 @@ public class ManagerModele {
         try
         {
             Connection co = SQLConnection.getConnection() ;
-            CallableStatement cs = co.prepareCall("? = sp_creerModele (?,?,?)") ;
+            CallableStatement cs = co.prepareCall("{? = call sp_creerModele (?,?,?)}") ;
             cs.registerOutParameter(1, java.sql.Types.TINYINT);
             cs.registerOutParameter(4, java.sql.Types.VARCHAR);
             cs.setString(2, mo.getIdModele());
@@ -63,7 +63,7 @@ public class ManagerModele {
         try
         {            
             Connection co = SQLConnection.getConnection() ;
-            PreparedStatement pst = co.prepareStatement("SELECT * FROM MODELE WHERE idModel = '" + idModele + "'") ;
+            PreparedStatement pst = co.prepareStatement("SELECT * FROM MODELE WHERE idModele = '" + idModele + "'") ;
             boolean test = pst.execute();
             if (test)
             {
@@ -129,7 +129,7 @@ public class ManagerModele {
         try
         {
             Connection co = SQLConnection.getConnection() ;
-            CallableStatement cs = co.prepareCall("? = sp_renommerModele (?,?,?)") ;
+            CallableStatement cs = co.prepareCall("{? = call sp_renommerModele (?,?,?)}") ;
             cs.registerOutParameter(1, java.sql.Types.TINYINT);
             cs.registerOutParameter(4, java.sql.Types.VARCHAR);
             cs.setString(2, aRenommer.getIdModele());
@@ -142,6 +142,7 @@ public class ManagerModele {
             else
             {
                 ok = true ;
+                aRenommer.setIdModele(newId);
             }
         }
         catch (Exception e)
@@ -157,13 +158,13 @@ public class ManagerModele {
      * @param obsolete est le nouveau statut à affecter au modèle
      * @return 
      */
-    public boolean updateObsoleteModele(Modele mo, boolean obsolete)
+    public static boolean updateObsoleteModele(Modele mo, boolean obsolete)
     {
         boolean ok = false ;
         try
         {
             Connection co = SQLConnection.getConnection() ;
-            CallableStatement cs = co.prepareCall("? = sp_changerStatutModele (?,?,?)") ;
+            CallableStatement cs = co.prepareCall("{? = call sp_changerStatutModele (?,?,?)}") ;
             cs.registerOutParameter(1, java.sql.Types.TINYINT);
             cs.registerOutParameter(4, java.sql.Types.VARCHAR);
             cs.setString(2, mo.getIdModele());
@@ -176,6 +177,7 @@ public class ManagerModele {
             else
             {
                 ok = true ;
+                mo.setObsolete(obsolete);
             }
         }
         catch (Exception e)
@@ -196,7 +198,7 @@ public class ManagerModele {
         try
         {
             Connection co = SQLConnection.getConnection() ;
-            CallableStatement cs = co.prepareCall("? = sp_supprimerModele (?,?)") ;
+            CallableStatement cs = co.prepareCall("{? = call sp_supprimerModele (?,?)}") ;
             cs.registerOutParameter(1, java.sql.Types.TINYINT);
             cs.registerOutParameter(3, java.sql.Types.VARCHAR);
             cs.setString(2, aSupprimer.getIdModele());
