@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<Form version="1.3" maxVersion="1.9" type="org.netbeans.modules.form.forminfo.JDialogFormInfo">
+  <Properties>
+    <Property name="defaultCloseOperation" type="int" value="2"/>
+    <Property name="title" type="java.lang.String" value="Lancer un nouveau lot"/>
+  </Properties>
+  <SyntheticProperties>
+    <SyntheticProperty name="formSizePolicy" type="int" value="1"/>
+    <SyntheticProperty name="generateCenter" type="boolean" value="false"/>
+  </SyntheticProperties>
+  <AuxValues>
+    <AuxValue name="FormSettings_autoResourcing" type="java.lang.Integer" value="0"/>
+    <AuxValue name="FormSettings_autoSetComponentName" type="java.lang.Boolean" value="false"/>
+    <AuxValue name="FormSettings_generateFQN" type="java.lang.Boolean" value="true"/>
+    <AuxValue name="FormSettings_generateMnemonicsCode" type="java.lang.Boolean" value="false"/>
+    <AuxValue name="FormSettings_i18nAutoMode" type="java.lang.Boolean" value="false"/>
+    <AuxValue name="FormSettings_layoutCodeTarget" type="java.lang.Integer" value="1"/>
+    <AuxValue name="FormSettings_listenerGenerationStyle" type="java.lang.Integer" value="0"/>
+    <AuxValue name="FormSettings_variablesLocal" type="java.lang.Boolean" value="false"/>
+    <AuxValue name="FormSettings_variablesModifier" type="java.lang.Integer" value="2"/>
+  </AuxValues>
+
+  <Layout>
+    <DimensionLayout dim="0">
+      <Group type="103" groupAlignment="0" attributes="0">
+          <Group type="102" alignment="0" attributes="0">
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                  <Group type="102" attributes="0">
+                      <Component id="labelModele" min="-2" pref="210" max="-2" attributes="0"/>
+                      <EmptySpace type="separate" max="-2" attributes="0"/>
+                      <Component id="labelQuantite" min="-2" pref="137" max="-2" attributes="0"/>
+                  </Group>
+                  <Group type="102" alignment="0" attributes="0">
+                      <Component id="comboboxModeles" min="-2" pref="210" max="-2" attributes="0"/>
+                      <EmptySpace type="separate" max="-2" attributes="0"/>
+                      <Component id="textfieldQuantite" max="32767" attributes="0"/>
+                  </Group>
+                  <Group type="102" alignment="0" attributes="0">
+                      <Group type="103" groupAlignment="1" max="-2" attributes="0">
+                          <Component id="labelQuantiteStock" alignment="0" max="32767" attributes="0"/>
+                          <Component id="labelQuantiteProduction" alignment="0" pref="210" max="32767" attributes="0"/>
+                      </Group>
+                      <EmptySpace type="separate" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="labelQuantiteProductionNombre" max="32767" attributes="0"/>
+                          <Component id="labelQuantiteStockNombre" max="32767" attributes="0"/>
+                      </Group>
+                  </Group>
+              </Group>
+              <EmptySpace min="-2" pref="30" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                  <Component id="buttonLancerLot" pref="146" max="32767" attributes="0"/>
+                  <Component id="buttonAnnuler" max="32767" attributes="0"/>
+              </Group>
+              <EmptySpace pref="23" max="32767" attributes="0"/>
+          </Group>
+      </Group>
+    </DimensionLayout>
+    <DimensionLayout dim="1">
+      <Group type="103" groupAlignment="0" attributes="0">
+          <Group type="102" alignment="0" attributes="0">
+              <EmptySpace min="-2" pref="26" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                  <Component id="labelQuantite" pref="35" max="32767" attributes="0"/>
+                  <Component id="labelModele" max="32767" attributes="0"/>
+              </Group>
+              <EmptySpace type="separate" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                  <Component id="buttonLancerLot" pref="35" max="32767" attributes="0"/>
+                  <Component id="comboboxModeles" max="32767" attributes="0"/>
+                  <Component id="textfieldQuantite" max="32767" attributes="0"/>
+              </Group>
+              <EmptySpace type="separate" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                  <Component id="buttonAnnuler" pref="35" max="32767" attributes="0"/>
+                  <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                      <Component id="labelQuantiteProductionNombre" max="32767" attributes="0"/>
+                      <Component id="labelQuantiteProduction" pref="35" max="32767" attributes="0"/>
+                  </Group>
+              </Group>
+              <EmptySpace type="separate" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                  <Component id="labelQuantiteStock" pref="35" max="32767" attributes="0"/>
+                  <Component id="labelQuantiteStockNombre" max="32767" attributes="0"/>
+              </Group>
+              <EmptySpace pref="21" max="32767" attributes="0"/>
+          </Group>
+      </Group>
+    </DimensionLayout>
+  </Layout>
+  <SubComponents>
+    <Component class="javax.swing.JComboBox" name="comboboxModeles">
+    </Component>
+    <Component class="javax.swing.JLabel" name="labelModele">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Mod&#xe8;le :"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="labelQuantite">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Quantit&#xe9; :"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JTextField" name="textfieldQuantite">
+    </Component>
+    <Component class="javax.swing.JLabel" name="labelQuantiteProduction">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Quantit&#xe9; en production :"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="labelQuantiteStock">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Quantit&#xe9; en stock :"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="labelQuantiteProductionNombre">
+    </Component>
+    <Component class="javax.swing.JLabel" name="labelQuantiteStockNombre">
+    </Component>
+    <Component class="javax.swing.JButton" name="buttonLancerLot">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Lancer le lot"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JButton" name="buttonAnnuler">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Annuler"/>
+      </Properties>
+    </Component>
+  </SubComponents>
+</Form>
