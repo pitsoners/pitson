@@ -13,6 +13,7 @@ public class Machine {
     private int m_IdPresse ;            // numéro de presse de la machine
     private String m_LibellePresse ;    // intitulé de la presse
     private boolean m_EnService ;       // bouléen qui vaut vrai si la machine est en service
+    private boolean m_Supprimable ;       // indique si la machine est supprimable ou non
     
     /**
      * Constructeur à utiliser quand on connait déjà l'id de la machine (lors du chargement de la machine dans la base de donnée)
@@ -60,11 +61,19 @@ public class Machine {
     public void setEnService(boolean enService) {
         this.m_EnService = enService;
     }
+
+    public boolean isSupprimable() {
+        return m_Supprimable;
+    }
+
+    public void setSupprimable(boolean supprimable) {
+        this.m_Supprimable = supprimable;
+    }
+    
     
     @Override
     public String toString() {
         return "Numéro presse : " + this.getIdPresse() + ", libellé presse : " + this.getLibellePresse() + ", en service : " + this.isEnService() ;
     }
-    
     
 }
