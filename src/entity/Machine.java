@@ -20,11 +20,13 @@ public class Machine {
      * @param idPresse
      * @param libellePresse
      * @param enService 
+     * @param supprimable 
      */
-    public Machine(int idPresse, String libellePresse, boolean enService)
+    public Machine(int idPresse, String libellePresse, boolean enService, boolean supprimable)
     {
         this(libellePresse, enService) ;
         setIdPresse(idPresse);
+        setSupprimable(supprimable);
     }
     
     /**
@@ -36,6 +38,7 @@ public class Machine {
     {
         setLibellePresse(libellePresse);
         setEnService(enService);
+        setSupprimable(true);       // Par défaut supprimable vaut vrai car quand on vient de créer une machine la base de données ne l'a pas intégré et donc aucun lot n'est passé dessus
     }
 
     public int getIdPresse() {
@@ -73,7 +76,7 @@ public class Machine {
     
     @Override
     public String toString() {
-        return "Numéro presse : " + this.getIdPresse() + ", libellé presse : " + this.getLibellePresse() + ", en service : " + this.isEnService() ;
+        return "Numéro presse : " + this.getIdPresse() + ", libellé presse : " + this.getLibellePresse() + ", en service : " + this.isEnService() + ", supprimable : " + this.isSupprimable() ;
     }
     
 }
