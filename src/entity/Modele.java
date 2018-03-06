@@ -22,6 +22,12 @@ public class Modele {
         setObsolete(obsolete);
     }
     
+    public Modele(String idModele, double diametre, boolean obsolete, boolean supprimable)
+    {
+        this(idModele, diametre, obsolete) ;
+        setSupprimable(supprimable);
+    }
+    
     public String getIdModele() {
         return m_IdModele;
     }
