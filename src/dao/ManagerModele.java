@@ -63,14 +63,18 @@ public class ManagerModele {
         try
         {            
             Connection co = SQLConnection.getConnection() ;
-            PreparedStatement pst = co.prepareStatement("SELECT * FROM MODELE WHERE idModele = '" + idModele + "'") ;
+            PreparedStatement pst = co.prepareStatement("SELECT *, (SELECT COUNT(*) FROM Modele\n" +
+                                                        "JOIN Lot ON Lot.idModele = Modele.idModele\n" +
+                                                        "GROUP BY Modele.idModele), (SELECT COUNT(*) FROM Modele\n" +
+                                                        "JOIN Stock ON Stock.idModele = Modele.idModele\n" +
+                                                        "GROUP BY Modele.idModele) FROM Modele WHERE idModele = '" + idModele + "'") ;
             boolean test = pst.execute();
             if (test)
             {
                 ResultSet rs = pst.getResultSet() ;
                 while (rs.next())
                 {
-                    retour = new Modele(rs.getString(1), rs.getDouble(2), rs.getBoolean(3)) ;
+                    retour = new Modele(rs.getString(1), rs.getDouble(2), rs.getBoolean(3), (rs.getInt(4)==0 && rs.getInt(5)==0)) ;
                 }
             }
             else
@@ -95,14 +99,18 @@ public class ManagerModele {
         try
         {            
             Connection co = SQLConnection.getConnection() ;
-            PreparedStatement pst = co.prepareStatement("SELECT * FROM MODELE ORDER BY idModele") ;
+            PreparedStatement pst = co.prepareStatement("SELECT *, (SELECT COUNT(*) FROM Modele\n" +
+                                                        "JOIN Lot ON Lot.idModele = Modele.idModele\n" +
+                                                        "GROUP BY Modele.idModele), (SELECT COUNT(*) FROM Modele\n" +
+                                                        "JOIN Stock ON Stock.idModele = Modele.idModele\n" +
+                                                        "GROUP BY Modele.idModele) FROM Modele ORDER BY idModele") ;
             boolean test = pst.execute();
             if (test)
             {
                 ResultSet rs = pst.getResultSet() ;
                 while (rs.next())
                 {
-                    liste.add(new Modele(rs.getString(1), rs.getDouble(2), rs.getBoolean(3))) ;
+                    liste.add(new Modele(rs.getString(1), rs.getDouble(2), rs.getBoolean(3), (rs.getInt(4)==0 && rs.getInt(5)==0))) ;
                 }
             }
             else
@@ -172,7 +180,7 @@ public class ManagerModele {
             cs.executeUpdate();
             if (cs.getByte(1) != 0)
             {
-                System.out.println("Erreur lors du renommage : " + cs.getByte(1) + "\nMessage d'erreur : " + cs.getString(4));
+                System.out.println("Erreur lors de la mise à jour du statut : " + cs.getByte(1) + "\nMessage d'erreur : " + cs.getString(4));
             }
             else
             {
