@@ -31,7 +31,7 @@ public class TestManagerMachine {
         System.out.println(recherche);
         System.out.println();
         
-        System.out.println("Création d'un nouveau modèle appelé test :");
+        System.out.println("Création d'une nouvelle machine appelée test :");
         Machine nouvelle = new Machine("test", true) ;
         ManagerMachine.creerMachine(nouvelle);
         nouvelle = ManagerMachine.getMachineFromId(nouvelle.getIdPresse());
