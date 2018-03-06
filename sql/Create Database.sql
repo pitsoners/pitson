@@ -817,7 +817,7 @@ BEGIN
 			set @msg = 'Modele inexistant !'
 		end
 
-		else if @idCategorie <> 'Petit' OR @idCategorie <> 'Moyen' OR @idCategorie <> 'Grand' 
+		else if @idCategorie <> 'Petit' AND @idCategorie <> 'Moyen' AND @idCategorie <> 'Grand' 
 		begin
 			set @return = 2;
 			set @msg = 'Categorie invalide !'
@@ -1113,7 +1113,7 @@ AS
 			set @msg = 'Pas de stock pour ce modele et cette categorie !'
 		end
 
-		else if @idCategorie <> 'Petit' OR @idCategorie <> 'Moyen' OR @idCategorie <> 'Grand' 
+		else if @idCategorie <> 'Petit' AND @idCategorie <> 'Moyen' AND @idCategorie <> 'Grand' 
 		begin
 			set @return = 2;
 			set @msg = 'Categorie invalide !'
@@ -1630,6 +1630,9 @@ BEGIN TRY
 		BEGIN
 		-- Par défaut lors de la création du modèle, le BIT Obsolete vaut 0
 			INSERT INTO Modele VALUES (@idModele, @diametre, 0);
+			INSERT INTO Stock VALUES(@idModele, 'Petit', 0, 4);
+			INSERT INTO Stock VALUES(@idModele, 'Moyen', 0, 4);
+			INSERT INTO Stock VALUES(@idModele, 'Grand', 0, 4);
 			SET @codeRetour = 0 ;
 			SET @messageRetour = 'Modèle ajouté dans la table avec succès.';
 		END
