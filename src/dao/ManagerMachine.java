@@ -65,14 +65,16 @@ public class ManagerMachine
         try
         {
             Connection co = SQLConnection.getConnection();
-            PreparedStatement pst = co.prepareStatement("SELECT * FROM Machine WHERE idPresse = " + idMachine);
+            PreparedStatement pst = co.prepareStatement("SELECT *, (SELECT COUNT(*) FROM Machine\n" +
+                                                        "JOIN Lot ON Lot.idPresse = Machine.idPresse\n" +
+                                                        "GROUP BY Machine.idPresse) FROM Machine WHERE idPresse = " + idMachine);
             boolean test = pst.execute();
             if(test)
             {
                 ResultSet rs = pst.getResultSet();
                 while(rs.next())
                 {
-                    retour = new Machine(rs.getInt(1), rs.getString(2), rs.getBoolean(3));
+                    retour = new Machine(rs.getInt(1), rs.getString(2), rs.getBoolean(3), (rs.getInt(4)==0));
                 }
             }
             else
@@ -98,14 +100,16 @@ public class ManagerMachine
         try
         {
             Connection co = SQLConnection.getConnection();
-            PreparedStatement pst = co.prepareStatement("SELECT * FROM Machine ORDER BY idPresse");
+            PreparedStatement pst = co.prepareStatement("SELECT *, (SELECT COUNT(*) FROM Machine\n" +
+                                                        "JOIN Lot ON Lot.idPresse = Machine.idPresse\n" +
+                                                        "GROUP BY Machine.idPresse) FROM Machine ORDER BY idPresse");
             boolean test = pst.execute();
             if(test)
             {
                 ResultSet rs = pst.getResultSet();
                 while(rs.next())
                 {
-                    liste.add(new Machine(rs.getInt(1), rs.getString(2), rs.getBoolean(3)));
+                    liste.add(new Machine(rs.getInt(1), rs.getString(2), rs.getBoolean(3), (rs.getInt(4)==0)));
                 }
             }
             else
@@ -199,7 +203,7 @@ public class ManagerMachine
         try
         {
             Connection co = SQLConnection.getConnection();
-            CallableStatement cs = co.prepareCall("{? = call sp_supprimerMachine(?,?)");
+            CallableStatement cs = co.prepareCall("{? = call sp_supprimerMachine(?,?)}");
             cs.registerOutParameter(1, java.sql.Types.INTEGER);
             cs.registerOutParameter(3, java.sql.Types.VARCHAR);
             cs.setInt(2, aSupprimer.getIdPresse());
@@ -220,5 +224,4 @@ public class ManagerMachine
         
         return ok;       
     }
- 
 }
