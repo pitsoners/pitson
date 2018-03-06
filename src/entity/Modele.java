@@ -13,6 +13,7 @@ public class Modele {
     private String m_IdModele ;     // nom du modèle
     private double m_Diametre ;     // diamètre nominal du modèle
     private boolean m_Obsolete ;    // bouléen qui vaut vrai si le modèle est obsolète
+    private boolean m_Supprimable ;   // indique si le modèle est supprimable ou non
 
     public Modele(String idModele, double diametre, boolean obsolete)
     {
@@ -44,10 +45,22 @@ public class Modele {
     public void setObsolete(boolean obsolete) {
         this.m_Obsolete = obsolete;
     }
+
+    public boolean isSupprimable() {
+        return m_Supprimable;
+    }
+
+    public void setSupprimable(boolean supprimable) {
+        this.m_Supprimable = supprimable;
+    }
     
+    
+
     @Override
     public String toString() {
-        return "Nom : " + this.getIdModele() + ", diamètre : " + this.getDiametre() + ", obsolete : " + this.isObsolete() ;
+        return "Nom : " + this.getIdModele() + ", diamètre : " + this.getDiametre() + ", obsolete : " + this.isObsolete() + ", supprimable : " + this.isSupprimable() ;
     }
+    
+    
     
 }
