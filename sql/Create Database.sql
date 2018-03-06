@@ -322,6 +322,7 @@ GO
 
 CREATE PROCEDURE sp_categoriePiece
 (
+	@nominal TypeMesure,
 	@ht TypeMesure,
 	@hl TypeMesure,
 	@bt TypeMesure,
@@ -341,7 +342,12 @@ BEGIN
 		DECLARE @mg bit = 0;
 		DECLARE @tg bit = 0;
 		DECLARE @rt bit = 0;
-
+		
+		SET @ht = @ht - @nominal;
+		SET @hl = @hl - @nominal;
+		SET @bt = @bt - @nominal;
+		SET @bl = @bl - @nominal;
+		
 		--pour chaque mesure, on teste la catégorie
 		EXECUTE sp_appliquerMesure @ht, @tp OUTPUT, @pm OUTPUT, @mm OUTPUT, @mg OUTPUT, @tg OUTPUT, @rt OUTPUT;
 		EXECUTE sp_appliquerMesure @hl, @tp OUTPUT, @pm OUTPUT, @mm OUTPUT, @mg OUTPUT, @tg OUTPUT, @rt OUTPUT;
@@ -464,7 +470,7 @@ BEGIN
 								SELECT @nominal = m.diametre
 								FROM Modele m JOIN Lot l On m.idModele = l.idModele
 								WHERE l.idLot = @idLot;
-								EXECUTE dbo.sp_categoriePiece @ht - @nominal, @hl - @nominal, @bt - @nominal, @bl - @nomional, @defautVisuel, @cat OUTPUT;
+								EXECUTE dbo.sp_categoriePiece @nominal, @ht, @hl, @bt, @bl, @defautVisuel, @cat OUTPUT;
 								INSERT INTO Piece (idLot, dimensionHT, dimensionHL, dimensionBT, dimensionBL, defautVisuel, commentaire, idCategorie)
 									OUTPUT INSERTED.idPiece INTO @tab VALUES (@idLot, @ht, @hl, @bt, @bl, @defautVisuel, @commentaire, @cat);
 								SELECT @idPiece = idPiece FROM @tab;
