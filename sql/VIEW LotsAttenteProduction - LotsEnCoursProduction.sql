@@ -3,7 +3,7 @@ GO
 
 CREATE VIEW LotsAttenteProduction
 AS
-	SELECT idLot, dateDemande, idModele
+	SELECT idLot, dateDemande, idModele, nbrPieceDemande
 	FROM Lot
 	WHERE etatProduction = 'Attente';
 GO
