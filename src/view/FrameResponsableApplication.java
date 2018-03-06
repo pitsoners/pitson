@@ -387,6 +387,21 @@ public class FrameResponsableApplication extends javax.swing.JFrame {
             java.util.logging.Logger.getLogger(FrameResponsableApplication.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
+        
+            private void buttonEnregistrerCategoriesActionPerformed(java.awt.event.ActionEvent evt)                                                            
+    {                                                                
+        if (evt.getSource() == buttonEnregistrerCategories)
+        {
+            if (setCategorie().getCode() == 0)
+            {
+                JOptionPane.showMessageDialog(this, setCategorie().getMessage());
+            }
+            else
+            {
+                JOptionPane.showMessageDialog(this, "Code erreur = " + setCategorie().getCode() + "\nMessage = " + setCategorie().getMessage());
+            }
+        }
+    }  
         //</editor-fold>
 
         /* Create and display the form */
@@ -438,21 +453,63 @@ public class FrameResponsableApplication extends javax.swing.JFrame {
     
     
     /**
-     * Cette méthode permet d'afficher dans les champs texte les dimenstions des catégories 
-     * stockés dans la base de donnée
+     * Cette méthode permet d'afficher dans les champs texte les dimenstions des
+     * catégories stockés dans la base de donnée
      */
-    private void setCategorie()
+    private void setCategorieInFrame()
     {
-        Categorie c =  ManagerCategorie.getCategorie("Petit");
+        Categorie c = ManagerCategorie.getCategorie("Petit");
         textfieldToleranceInferieurePetit.setText("" + c.getMinCategorie());
         textfieldToleranceSuperieurePetit.setText("" + c.getMaxCategorie());
 
-         c =  ManagerCategorie.getCategorie("Moyen");
+        c = ManagerCategorie.getCategorie("Moyen");
         textfieldToleranceInferieureMoyen.setText("" + c.getMinCategorie());
         textfieldToleranceSuperieureMoyen.setText("" + c.getMaxCategorie());
 
-         c =  ManagerCategorie.getCategorie("Grand");
+        c = ManagerCategorie.getCategorie("Grand");
         textfieldToleranceInferieureGrand.setText("" + c.getMinCategorie());
-        textfieldToleranceSuperieureGrand.setText("" + c.getMaxCategorie());       
+        textfieldToleranceSuperieureGrand.setText("" + c.getMaxCategorie());
+    }
+
+    /**
+     * Cette méthode permet de récupérer les Catégories saisies dans le
+     * formulaire
+     *
+     * @return retourne vrai si les catégories sont conforment
+     */
+    private ReturnDataBase setCategorie()
+    {
+        ReturnDataBase retour = null;
+        try
+        {
+            double min;
+            double max;
+            if (util.Tools.isTypeMesure(textfieldToleranceInferieurePetit.getText()) && util.Tools.isTypeMesure(textfieldToleranceSuperieurePetit.getText())
+                    && util.Tools.isTypeMesure(textfieldToleranceInferieureMoyen.getText()) && util.Tools.isTypeMesure(textfieldToleranceSuperieureMoyen.getText())
+                    && util.Tools.isTypeMesure(textfieldToleranceInferieureGrand.getText()) && util.Tools.isTypeMesure(textfieldToleranceSuperieureGrand.getText()))
+            {
+                min = Double.parseDouble(textfieldToleranceInferieurePetit.getText());
+                max = Double.parseDouble(textfieldToleranceSuperieurePetit.getText());
+
+                Categorie catPetit = new Categorie("Petit", min, max);
+
+                min = Double.parseDouble(textfieldToleranceInferieureMoyen.getText());
+                max = Double.parseDouble(textfieldToleranceSuperieureMoyen.getText());
+
+                Categorie catMoyen = new Categorie("Moyen", min, max);
+
+                min = Double.parseDouble(textfieldToleranceInferieureGrand.getText());
+                max = Double.parseDouble(textfieldToleranceSuperieureGrand.getText());
+
+                Categorie catGrand = new Categorie("Grand", min, max);
+
+                retour = ManagerCategorie.initialiseCategorie(catPetit, catMoyen, catGrand);
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return retour;
     }
 }
