@@ -402,7 +402,6 @@ AS
 BEGIN
 	DECLARE @codeRetour int = -1;
 	SET @messageRetour = 'Non implementé';
-
 	IF @idLot IS NULL
 		BEGIN
 			SET @codeRetour = 1;
@@ -461,7 +460,11 @@ BEGIN
 							BEGIN
 								DECLARE @cat TypeCategorie;
 								DECLARE @tab TABLE (idPiece int);
-								EXECUTE dbo.sp_categoriePiece @ht, @hl,@bt, @bl, @defautVisuel, @cat OUTPUT;
+								DECLARE @nominal TypeMesure;
+								SELECT @nominal = m.diametre
+								FROM Modele m JOIN Lot l On m.idModele = l.idModele
+								WHERE l.idLot = @idLot;
+								EXECUTE dbo.sp_categoriePiece @ht - @nominal, @hl - @nominal, @bt - @nominal, @bl - @nomional, @defautVisuel, @cat OUTPUT;
 								INSERT INTO Piece (idLot, dimensionHT, dimensionHL, dimensionBT, dimensionBL, defautVisuel, commentaire, idCategorie)
 									OUTPUT INSERTED.idPiece INTO @tab VALUES (@idLot, @ht, @hl, @bt, @bl, @defautVisuel, @commentaire, @cat);
 								SELECT @idPiece = idPiece FROM @tab;
