@@ -13,6 +13,18 @@ public class Lot
     private int nbrPieceDemande;    // la quantité des pieces demandées
     private int idPresse;           // le numéro de la presse
     
+    public Lot(int idLot, Date dateDemande, String idModele, int nbPieces)
+    {
+        this(idModele, "Attente", "Attente", nbPieces);
+        this.dateDemande = dateDemande;
+    }
+    
+    public Lot(int idLot, Date dateDemande, String idModele, Date dateProduction, int nbPieces)
+    {
+        this(idLot, dateDemande, idModele, nbPieces);
+        this.dateProduction = dateProduction;
+    }
+    
     /**
      * Constructeur à utiliser quand on crée un lot dans l'application en attendant de le mettre dans la base de données
      * @param idModele
