@@ -1,11 +1,3 @@
-USE master;
-GO
-
-CREATE DATABASE PitsonV2;
-GO
-
-USE PitsonV2;
-GO
 
 /* Création des types */
 
@@ -1980,8 +1972,6 @@ GO
 						3 => Erreur base de donnée (Exception)
 -- Sortie : @mes = Contient le message d'erreur ou de réussite 
 -- =============================================================*/
-USE Pitson
-Go 
 
 CREATE PROC sp_statPresse (@idPresse int, @idModele TypeIDModele, @dateDebut datetime, @dateFin datetime, @msg varchar(250) OUTPUT)
 AS
