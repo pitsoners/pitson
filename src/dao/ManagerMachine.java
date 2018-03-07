@@ -65,9 +65,7 @@ public class ManagerMachine
         try
         {
             Connection co = SQLConnection.getConnection();
-            PreparedStatement pst = co.prepareStatement("SELECT *, (SELECT COUNT(*) FROM Machine\n" +
-                                                        "JOIN Lot ON Lot.idPresse = Machine.idPresse\n" +
-                                                        "GROUP BY Machine.idPresse) FROM Machine WHERE idPresse = " + idMachine);
+            PreparedStatement pst = co.prepareStatement("SELECT *, (SELECT COUNT(idLot) FROM Lot l WHERE l.idPresse = Machine.idPresse) FROM Machine WHERE idPresse = " + idMachine);
             boolean test = pst.execute();
             if(test)
             {
@@ -100,9 +98,7 @@ public class ManagerMachine
         try
         {
             Connection co = SQLConnection.getConnection();
-            PreparedStatement pst = co.prepareStatement("SELECT *, (SELECT COUNT(*) FROM Machine\n" +
-                                                        "JOIN Lot ON Lot.idPresse = Machine.idPresse\n" +
-                                                        "GROUP BY Machine.idPresse) FROM Machine ORDER BY idPresse");
+            PreparedStatement pst = co.prepareStatement("SELECT *, (SELECT COUNT(idLot) FROM Lot l WHERE l.idPresse = Machine.idPresse) FROM Machine ORDER BY idPresse");
             boolean test = pst.execute();
             if(test)
             {
