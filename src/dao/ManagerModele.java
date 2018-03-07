@@ -63,11 +63,7 @@ public class ManagerModele {
         try
         {            
             Connection co = SQLConnection.getConnection() ;
-            PreparedStatement pst = co.prepareStatement("SELECT *, (SELECT COUNT(*) FROM Modele\n" +
-                                                        "JOIN Lot ON Lot.idModele = Modele.idModele\n" +
-                                                        "GROUP BY Modele.idModele), (SELECT COUNT(*) FROM Modele\n" +
-                                                        "JOIN Stock ON Stock.idModele = Modele.idModele\n" +
-                                                        "GROUP BY Modele.idModele) FROM Modele WHERE idModele = '" + idModele + "'") ;
+            PreparedStatement pst = co.prepareStatement("SELECT *, (SELECT COUNT(idLot) FROM Lot l WHERE l.idModele = Modele.idModele), (SELECT COUNT(idModele) FROM Stock s WHERE s.idModele = Modele.idModele) FROM Modele WHERE idModele = '" + idModele + "'") ;
             boolean test = pst.execute();
             if (test)
             {
@@ -99,11 +95,7 @@ public class ManagerModele {
         try
         {            
             Connection co = SQLConnection.getConnection() ;
-            PreparedStatement pst = co.prepareStatement("SELECT *, (SELECT COUNT(*) FROM Modele\n" +
-                                                        "JOIN Lot ON Lot.idModele = Modele.idModele\n" +
-                                                        "GROUP BY Modele.idModele), (SELECT COUNT(*) FROM Modele\n" +
-                                                        "JOIN Stock ON Stock.idModele = Modele.idModele\n" +
-                                                        "GROUP BY Modele.idModele) FROM Modele ORDER BY idModele") ;
+            PreparedStatement pst = co.prepareStatement("SELECT *, (SELECT COUNT(idLot) FROM Lot l WHERE l.idModele = Modele.idModele), (SELECT COUNT(idModele) FROM Stock s WHERE s.idModele = Modele.idModele) FROM Modele ORDER BY idModele") ;
             boolean test = pst.execute();
             if (test)
             {
