@@ -16,4 +16,29 @@ public class Tools
         }
         return ok;
     }
+    
+    /**
+	 * Permet de vérifier si une chaine de caractères contient réellement des caractères
+	 * Les espaces et les retours chariot ne sont pas pris en compte
+	 * @param chaine est la chaine à vérifier
+	 * @return
+	 */
+	public static boolean estNonVide(String chaine)
+	{
+		boolean ok = false ;	// booléen à renvoyer
+		int i = 0 ;				// indice de parcours
+		
+		if (chaine != null && chaine != "")
+		{
+			while(i < chaine.length() && ok == false)
+			{
+				if (chaine.charAt(i) != ' ' && chaine.charAt(i) != '\n')
+				{
+					ok = true ;
+				}
+				i ++ ;
+			}
+		}
+		return ok ;
+	}
 }
