@@ -227,4 +227,36 @@ public class ManagerModele {
         return ok ;
     }
     
+        /**
+     * Cette méthode permet de récupérer l'id de tous les modèles qui ne sont
+     * pas obsolète ou qui sont obsolètes mais ont toujours des caisses en stock
+     *
+     * @return retourne une liste de tous les modèles qui ne sont pas obsolètes
+     */
+    public static ArrayList<String> getListeIdModele()
+    {
+        ArrayList<String> listeIdModele = new ArrayList<>();
+        Connection connection;
+        try
+        {
+            connection = SQLConnection.getConnection();
+            Statement s = connection.createStatement();
+            ResultSet rs = s.executeQuery("SELECT Modele.idModele\n"
+                    + "FROM Modele\n"
+                    + "Join Stock ON Modele.idModele = Stock.idModele\n"
+                    + "WHERE Modele.obsolete = 0\n"
+                    + "OR (Modele.obsolete = 1 \n"
+                    + "AND Stock.qtStock > 0)\n"
+                    + "GROUP BY Modele.idModele");
+            while (rs.next())
+            {
+                listeIdModele.add(rs.getString(1));
+            }
+        }
+        catch (SQLException ex)
+        {
+            Logger.getLogger(ManagerStock.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return listeIdModele;
+    }
 }
