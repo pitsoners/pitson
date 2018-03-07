@@ -28,7 +28,7 @@ public class Tools
 		boolean ok = false ;	// booléen à renvoyer
 		int i = 0 ;				// indice de parcours
 		
-		if (chaine != null && chaine != "")
+		if (chaine != null && !chaine.equals(""))
 		{
 			while(i < chaine.length() && ok == false)
 			{
