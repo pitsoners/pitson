@@ -31,7 +31,7 @@ public class RendererListLotAttente implements ListCellRenderer<Lot>
         }
         else
         {
-            lab.setBackground(list.getBackground());
+            lab.setBackground(Color.WHITE);
             lab.setForeground(list.getForeground());
         }
         if (cellHasFocus)
