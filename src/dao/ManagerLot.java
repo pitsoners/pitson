@@ -31,12 +31,14 @@ public class ManagerLot
         try
         {
             connection = SQLConnection.getConnection();
-            CallableStatement cs = connection.prepareCall("{? = call sp_lancerLot (?, ?, ?)}");
+            CallableStatement cs = connection.prepareCall("{? = call sp_lancerLot (?, ?, ?,?)}");
             cs.registerOutParameter(1, Types.INTEGER);
             cs.setString(2, lot.getIdModele());
             cs.setInt(3, lot.getNbrPieceDemande());
-            cs.registerOutParameter(4, Types.VARCHAR);
+            cs.registerOutParameter(4, Types.INTEGER);
+            cs.registerOutParameter(5, Types.VARCHAR);
             cs.execute();
+            lot.setIdLot(cs.getInt(4));
             int code = cs.getInt(1);
             String message = cs.getString(5);
 
