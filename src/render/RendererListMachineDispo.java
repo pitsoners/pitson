@@ -21,7 +21,7 @@ public class RendererListMachineDispo implements ListCellRenderer<Machine>
     @Override
     public Component getListCellRendererComponent(JList<? extends Machine> list, Machine ma, int index, boolean isSelected, boolean cellHasFocus)
     {
-        JLabel lab = new JLabel("n° "+ma.getIdPresse()+" - ["+ma.getLibellePresse()+"] - ");
+        JLabel lab = new JLabel("Presse n° "+ma.getIdPresse()+" - ["+ma.getLibellePresse()+"] - ");
         lab.setOpaque(true);
         if(isSelected)
         {
