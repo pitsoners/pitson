@@ -176,16 +176,39 @@ public class FrameMagasinier extends javax.swing.JFrame
         //</editor-fold>
         //</editor-fold>
         //</editor-fold>
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable()
+         private void butStockActionPerformed(java.awt.event.ActionEvent evt)                                         
+    {                                             
+        if (evt.getSource() == butStock)
         {
-            public void run()
+            ReturnDataBase retour = ManagerStock.addStock((String) comboModele.getSelectedItem(), (String) comboCategorie.getSelectedItem(), textQuantite.getText());
+            if (retour.getCode() == 0)
             {
-                new FrameMagasinier().setVisible(true);
+                JOptionPane.showMessageDialog(this, retour.getMessage());
+                refresh();
             }
-        });
-    }
+            else
+            {
+                JOptionPane.showMessageDialog(this, "Code erreur = " + retour.getCode() + "\nMessage = " + retour.getMessage());
+            }
+        }
+    }                                        
+
+    private void butDestockActionPerformed(java.awt.event.ActionEvent evt)                                           
+    {                                               
+        if (evt.getSource() == butDestock)
+        {
+            ReturnDataBase retour = ManagerStock.deStock((String) comboModele.getSelectedItem(), (String) comboCategorie.getSelectedItem(), textQuantite.getText());
+            if (retour.getCode() == 0)
+            {
+                JOptionPane.showMessageDialog(this, retour.getMessage());
+                refresh();
+            }
+            else
+            {
+                JOptionPane.showMessageDialog(this, "Code erreur = " + retour.getCode() + "\nMessage = " + retour.getMessage());
+            }
+        }
+    }                                          
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton butDestock;
@@ -200,4 +223,11 @@ public class FrameMagasinier extends javax.swing.JFrame
     private javax.swing.JTable tableStock;
     private javax.swing.JTextField textQuantite;
     // End of variables declaration//GEN-END:variables
+    
+        public void refresh()
+    {
+        ModelTableStock model = new ModelTableStock();
+        tableStock.setModel(model);
+        model.fireTableDataChanged();
+    }
 }
