@@ -60,6 +60,16 @@ public class Modele {
         this.m_Supprimable = supprimable;
     }
     
+     public void recopieModele(Modele aCopier)
+    {
+        if (aCopier != null)
+        {
+            setIdModele(aCopier.getIdModele());
+            setDiametre(aCopier.getDiametre());
+            setObsolete(aCopier.isObsolete());
+            setSupprimable(aCopier.isSupprimable());
+        }
+    }
     
 
     @Override
