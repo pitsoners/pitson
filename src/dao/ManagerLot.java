@@ -21,33 +21,22 @@ public class ManagerLot
 {
      /**
      * Cette méthode permet de lancer la production d'un lot en attente
-     *
-     * @param modele est le modèle des pistons demandé dans ce lot
-     * @param quantite est la quantité de pistons à produire
-     * @return retourne le code de retour et le message de réussite ou d'erreur
+     * @param lot
+     * @return 
      */
-    public static ReturnDataBase lancerLot(String modele, String quantite)
+    public static ReturnDataBase lancerLot(Lot lot)
     {
         ReturnDataBase retour = null;
-        int q = 0;
         Connection connection;
         try
         {
             connection = SQLConnection.getConnection();
-
-            if (Tools.estInt(quantite))
-            {
-                q = Integer.parseInt(quantite);
-            }
-
             CallableStatement cs = connection.prepareCall("{? = call sp_lancerLot (?, ?, ?)}");
             cs.registerOutParameter(1, Types.INTEGER);
-            cs.setString(2, modele);
-            cs.setInt(3, q);
+            cs.setString(2, lot.getIdModele());
+            cs.setInt(3, lot.getNbrPieceDemande());
             cs.registerOutParameter(4, Types.VARCHAR);
-
             cs.execute();
-
             int code = cs.getInt(1);
             String message = cs.getString(5);
 
