@@ -139,18 +139,15 @@ public class ManagerStock
 
     public static ReturnDataBase deStock(String model, String categorie, String quantite)
     {
-        System.out.println("Coucou");
         ReturnDataBase retour = null;
         int q = 0;
         Connection connection;
         try
         {
-            System.out.println("Coucou try");
             connection = SQLConnection.getConnection();
 
             if (Tools.estInt(quantite))
             {
-                System.out.println("Coucou if");
                 q = Integer.parseInt(quantite);
             }
 
@@ -167,8 +164,6 @@ public class ManagerStock
             String message = cs.getString(5);
 
             retour = new ReturnDataBase(code, message);
-            System.out.println("code " + code + " - " + message);
-            System.out.println("Coucou Fin");
         }
         catch (SQLException ex)
         {
