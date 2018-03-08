@@ -48,7 +48,7 @@ public class ManagerLot
             return ok;
     }
     
-     /**
+    /**
      * Méthode permettant le demarrage de la production d'un lot
      * @param lotEnProd
      * @return 
@@ -132,7 +132,13 @@ public class ManagerLot
                 ResultSet rs = pst.getResultSet();
                 while(rs.next())
                 {
-                    liste.add(new Lot(rs.getInt(1), rs.getDate(2), rs.getString(3), rs.getDate(4), rs.getInt(5)));
+                    Lot l = new Lot();
+                    l.setIdLot(rs.getInt(1));
+                    l.setDateDemande(rs.getDate(2));
+                    l.setIdModele(rs.getString(3));
+                    l.setDateProduction(rs.getDate(4));
+                    l.setIdPresse(rs.getInt(5));
+                    liste.add(l);
                 }
             }
             else
