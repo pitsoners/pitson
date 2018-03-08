@@ -33,6 +33,16 @@ public class LotEnCoursModel extends AbstractListModel<Lot>
         }
     }
     
+     public void removeLot(Lot l) 
+    {
+        if(l != null)
+        {
+            int index = listLot.indexOf(l);
+            listLot.remove(l);
+            fireIntervalRemoved(listLot, index, index);
+        }
+    }
+    
     @Override
     public int getSize()
     {
