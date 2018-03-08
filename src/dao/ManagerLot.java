@@ -216,6 +216,13 @@ public class ManagerLot
         return ok;
     }
     
+        /**
+     * Cette méthode permet de lancer la production d'un lot en attente
+     *
+     * @param modele est le modèle des pistons demandé dans ce lot
+     * @param quantite est la quantité de pistons à produire
+     * @return retourne le code de retour et le message de réussite ou d'erreur
+     */
         public static ReturnDataBase lancerLot(String modele, String quantite)
     {
         ReturnDataBase retour = null;
