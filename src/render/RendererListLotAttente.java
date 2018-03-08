@@ -7,6 +7,7 @@ package render;
 
 import entity.Lot;
 import java.awt.Component;
+import java.awt.Color;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
@@ -21,7 +22,8 @@ public class RendererListLotAttente implements ListCellRenderer<Lot>
     @Override
     public Component getListCellRendererComponent(JList<? extends Lot> list, Lot lot, int index, boolean isSelected, boolean cellHasFocus)
     {
-        JLabel lab = new JLabel("n° : "+lot.getIdLot()+" - ID modèle :"+lot.getIdModele()+" - n° pieces demandées :"+lot.getNbrPieceDemande());
+        JLabel lab = new JLabel("n° "+lot.getIdLot()+" - ["+lot.getIdModele()+"] - "+lot.getNbrPieceDemande() + " pièces");
+        lab.setOpaque(true);
         if (isSelected)
         {
             lab.setBackground(list.getSelectionBackground());
@@ -32,7 +34,10 @@ public class RendererListLotAttente implements ListCellRenderer<Lot>
             lab.setBackground(list.getBackground());
             lab.setForeground(list.getForeground());
         }
-        
+        if (cellHasFocus)
+        {
+            lab.setBorder(new javax.swing.border.LineBorder(Color.yellow));
+        }
         
         return lab;
     }
