@@ -16,6 +16,7 @@ public class FrameResponsableApplication extends javax.swing.JFrame {
      */
     public FrameResponsableApplication() {
         initComponents();
+        setCategorieInFrame();
     }
 
     /**
@@ -402,6 +403,11 @@ public class FrameResponsableApplication extends javax.swing.JFrame {
             }
         }
     }  
+        
+            private void buttonReinitialiserCategoriesActionPerformed(java.awt.event.ActionEvent evt)                                                              
+    {                                                                  
+        setCategorieInFrame();
+    }    
         //</editor-fold>
 
         /* Create and display the form */
