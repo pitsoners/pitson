@@ -775,7 +775,7 @@ GO
 -- Procedure entrée caisse dans le stock
 --===============================================================================
 
-CREATE PROCEDURE sp_entreeStock(@idModele TypeIDModele, @idCategorie TypeCategorie, @qtEntree int, @msg varchar(250))
+CREATE PROCEDURE sp_entreeStock(@idModele TypeIDModele, @idCategorie TypeCategorie, @qtEntree int, @msg varchar(250) OUTPUT)
 AS
 BEGIN
 	declare @return int;
@@ -1061,7 +1061,7 @@ GO
 -- Procedure sortie caisse du stock
 --===============================================================================
 
-CREATE PROCEDURE sp_sortieStock(@idModele TypeIDModele, @idCategorie TypeCategorie, @qtSortie int, @msg varchar(250))
+CREATE PROCEDURE sp_sortieStock(@idModele TypeIDModele, @idCategorie TypeCategorie, @qtSortie int, @msg varchar(250) OUTPUT)
 AS
 	declare @return int;
 
