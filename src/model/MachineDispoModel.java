@@ -18,6 +18,16 @@ public class MachineDispoModel extends AbstractListModel<Machine>
         listeMachines = ManagerMachine.getMachineList();
     }
 
+     public void removeMachine(Machine m) 
+    {
+        if(m != null)
+        {
+            int index = listeMachines.indexOf(m);
+            listeMachines.remove(m);
+            fireIntervalRemoved(listeMachines, index, index);
+        }
+    }
+
     @Override
     public int getSize()
     {
