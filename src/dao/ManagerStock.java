@@ -89,4 +89,92 @@ public class ManagerStock
         }
         return listeTitre;
     }
+    
+        /**
+     * Cette méthode permet d'ajouter des caisses en stock pour un modele et une
+     * catégorie donnée
+     *
+     * @param model est le model des pieces dans les caisses
+     * @param categorie est la catégorie des pieces dans les caisses
+     * @param quantite est la quantité de caisses
+     * @return
+     */
+    public static ReturnDataBase addStock(String model, String categorie, String quantite)
+    {
+        //Exception s = new Exception();
+        //s.printStackTrace();
+
+        ReturnDataBase retour = null;
+        int q = 0;
+        Connection connection;
+        try
+        {
+            connection = SQLConnection.getConnection();
+
+            if (Tools.estInt(quantite))
+            {
+                q = Integer.parseInt(quantite);
+            }
+
+            CallableStatement cs = connection.prepareCall("{? = call sp_entreeStock (?, ?, ?, ?)}");
+            cs.registerOutParameter(1, Types.TINYINT);
+            cs.setString(2, model);
+            cs.setString(3, categorie);
+            cs.setInt(4, q);
+            cs.registerOutParameter(5, Types.VARCHAR);
+
+            cs.executeUpdate();
+
+            int code = cs.getInt(1);
+            String message = cs.getString(5);
+
+            retour = new ReturnDataBase(code, message);
+        }
+        catch (SQLException ex)
+        {
+            Logger.getLogger(ManagerStock.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return retour;
+    }
+
+    public static ReturnDataBase deStock(String model, String categorie, String quantite)
+    {
+        System.out.println("Coucou");
+        ReturnDataBase retour = null;
+        int q = 0;
+        Connection connection;
+        try
+        {
+            System.out.println("Coucou try");
+            connection = SQLConnection.getConnection();
+
+            if (Tools.estInt(quantite))
+            {
+                System.out.println("Coucou if");
+                q = Integer.parseInt(quantite);
+            }
+
+            CallableStatement cs = connection.prepareCall("{? = call sp_sortieStock (?, ?, ?, ?)}");
+            cs.registerOutParameter(1, Types.TINYINT);
+            cs.setString(2, model);
+            cs.setString(3, categorie);
+            cs.setInt(4, q);
+            cs.registerOutParameter(5, Types.VARCHAR);
+
+            cs.executeUpdate();
+
+            int code = cs.getInt(1);
+            String message = cs.getString(5);
+
+            retour = new ReturnDataBase(code, message);
+            System.out.println("code " + code + " - " + message);
+            System.out.println("Coucou Fin");
+        }
+        catch (SQLException ex)
+        {
+            Logger.getLogger(ManagerStock.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return retour;
+    }
 }
