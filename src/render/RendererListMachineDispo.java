@@ -33,6 +33,10 @@ public class RendererListMachineDispo implements ListCellRenderer<Machine>
             lab.setBackground(list.getBackground());
             lab.setForeground(list.getForeground());
         }
+         if(cellHasFocus)
+        {
+            lab.setBorder(new javax.swing.border.LineBorder(Color.yellow));
+        }
         return lab;
     }
     
