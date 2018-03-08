@@ -1,5 +1,7 @@
 package entity;
 
+import java.sql.Date;
+
 /**
  *
  * @author preda
@@ -12,11 +14,14 @@ public class Lot
     private String etatControle;    // l'état du controle
     private int nbrPieceDemande;    // la quantité des pieces demandées
     private int idPresse;           // le numéro de la presse
+    private Date dateDemande;       // date de la demande du lot
+    private Date dateProduction;    // date du début de la production du lot
     
     public Lot(int idLot, Date dateDemande, String idModele, int nbPieces)
     {
         this(idModele, "Attente", "Attente", nbPieces);
         this.dateDemande = dateDemande;
+        this.idLot = idLot;
     }
     
     public Lot(int idLot, Date dateDemande, String idModele, Date dateProduction, int nbPieces)
@@ -54,19 +59,9 @@ public class Lot
         this.idLot = idLot;
     }
     
-    /**
-     * Constructeur à utiliser quand on crée un lot en cours de production à partir de la base de données
-     * @param idPresse
-     * @param idLot
-     * @param idModele
-     * @param etatProduction
-     * @param etatControle
-     * @param nbrPieceDemande 
-     */
-    public Lot(int idPresse, int idLot, String idModele, String etatProduction, String etatControle, int nbrPieceDemande)
+    public Lot()
     {
-        this(idLot, idModele, etatProduction, etatControle, nbrPieceDemande);
-        this.idPresse = idPresse;
+        
     }
 
     public int getIdLot()
@@ -127,6 +122,35 @@ public class Lot
     public void setIdPresse(int idPresse)
     {
         this.idPresse = idPresse;
+    }
+
+    public Date getDateDemande()
+    {
+        return dateDemande;
+    }
+
+    public void setDateDemande(Date dateDemande)
+    {
+        this.dateDemande = dateDemande;
+    }
+
+    public Date getDateProduction()
+    {
+        return dateProduction;
+    }
+
+    public void setDateProduction(Date dateProduction)
+    {
+        this.dateProduction = dateProduction;
+    }
+    
+    @Override
+    public String toString() 
+    {
+        return "Numéro lot : " + this.getIdLot() + ", ID modèle : " + this.getIdModele()+ 
+                ", Etat de production : " + this.getEtatProduction() + ", Etat de controle : " + this.getEtatControle()+
+                ", Numéro pieces demandées : " + this.getNbrPieceDemande() +
+                ", ID presse : " + this.getIdPresse();
     }
 
 }
