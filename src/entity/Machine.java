@@ -73,6 +73,16 @@ public class Machine {
         this.m_Supprimable = supprimable;
     }
     
+     public void recopieMachine(Machine aCopier)
+    {
+        if (aCopier != null)
+        {
+            setIdPresse(aCopier.getIdPresse());
+            setLibellePresse(aCopier.getLibellePresse());
+            setEnService(aCopier.isEnService());
+            setSupprimable(aCopier.isSupprimable());
+        }
+    }
     
     @Override
     public String toString() {
