@@ -82,6 +82,40 @@ public class ManagerLot
         return ok;
     }
     
+     /**
+     * Méthode permettant de terminer la production d'un lot
+     * @param lotProdFini
+     * @return 
+     */
+    public static boolean terminerProd(Lot lotProdFini)
+    {
+        boolean ok = false;
+        try
+        {
+            Connection co = SQLConnection.getConnection();
+            CallableStatement cs = co.prepareCall("{? = call sp_terminerProd(?,?)}");
+            cs.registerOutParameter(1, java.sql.Types.INTEGER);
+            cs.registerOutParameter(3, java.sql.Types.VARCHAR);
+            cs.setInt(2, lotProdFini.getIdLot());
+            cs.executeUpdate();
+            if(cs.getByte(1) != 0)
+            {
+                System.out.println("Erreur, production pas terminé :"+ cs.getByte(1) + "\nMessage d'erreur : " + cs.getString(4));
+            }
+            else
+            {
+                ok = true;
+            }
+        }
+        catch(Exception e)
+        {
+            System.out.println(e);
+        }
+        
+        return ok;
+        
+    }
+    
     /**
      * Méthode permettant de récupérer la liste de tous les lots en attente de production existants dans la base de données
      * @return 
