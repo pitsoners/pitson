@@ -86,6 +86,7 @@ public class ModelTableStock extends AbstractTableModel
                 break;
             case 3:
                 retour = "" + stock.getQuantiteGrand();
+                break;
             case 4:
                 retour = "" + stock.getTotalQuantite();
         }
