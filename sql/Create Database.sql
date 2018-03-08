@@ -821,8 +821,6 @@ BEGIN
 			UPDATE Stock
 			set qtStock = qtStock + @qtEntree
 			where Stock.idModele = @idModele AND Stock.idCategorie = @idCategorie
-			if @@ROWCOUNT = 0
-				INSERT INTO Stock(idModele, idCategorie, qtStock) values(@idModele, @idCategorie, @qtEntree)
 				set @return = 0;
 				set @msg = 'Quantitée ajoutée au stock'
 		end
