@@ -6,6 +6,7 @@
 package render;
 
 import entity.Machine;
+import java.awt.Color;
 import java.awt.Component;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -30,10 +31,10 @@ public class RendererListMachineDispo implements ListCellRenderer<Machine>
         }
         else
         {
-            lab.setBackground(list.getBackground());
+            lab.setBackground(Color.WHITE);
             lab.setForeground(list.getForeground());
         }
-         if(cellHasFocus)
+        if(cellHasFocus)
         {
             lab.setBorder(new javax.swing.border.LineBorder(Color.yellow));
         }
