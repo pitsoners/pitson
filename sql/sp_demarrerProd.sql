@@ -75,6 +75,7 @@ AS
 			UPDATE Lot 
 			SET Lot.etatProduction = 'EnCours',
 				 Lot.idPresse = @idMachine
+				 Lot.dateProduction = GETDATE()
 			WHERE Lot.idLot = @idLot
 
 			SET @retour = 0;
