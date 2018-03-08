@@ -215,4 +215,38 @@ public class ManagerLot
         
         return ok;
     }
+    
+        public static ReturnDataBase lancerLot(String modele, String quantite)
+    {
+        ReturnDataBase retour = null;
+        int q = 0;
+        Connection connection;
+        try 
+        {
+            connection = SQLConnection.getConnection();
+            
+            if(Tools.estInt(quantite))
+            {
+                q = Integer.parseInt(quantite);
+            }
+            
+            CallableStatement cs = connection.prepareCall("{? = call sp_lancerLot (?, ?, ?)}");
+            cs.registerOutParameter(1, Types.INTEGER);
+            cs.setString(2, modele);
+            cs.setInt(3, q);
+            cs.registerOutParameter(4, Types.VARCHAR);
+            
+            cs.execute();
+            
+            int code = cs.getInt(1);
+            String message = cs.getString(5);
+            
+            retour = new ReturnDataBase(code, message);
+        }
+        catch (SQLException ex)
+        {
+            Logger.getLogger(ManagerLot.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return retour;
+    }
 }
