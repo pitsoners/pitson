@@ -846,6 +846,7 @@ CREATE PROCEDURE sp_lancerLot
 (
 	@modele TypeIDModele,
 	@quantite int,
+	@idLot int OUTPUT,
 	@messageRetour TypeMessageRetour OUTPUT
 )
 AS
@@ -883,7 +884,11 @@ BEGIN
 				END
 			ELSE
 				BEGIN
-					INSERT INTO Lot (dateDemande, etatProduction, etatControle, idModele, nbrPieceDemande) OUTPUT INSERTED.idLot VALUES (GETDATE(), 'Attente', 'Attente', @modele, @quantite);
+					DECLARE @tab TABLE (idLot int);
+					INSERT INTO Lot (dateDemande, etatProduction, etatControle, idModele, nbrPieceDemande)
+						OUTPUT INSERTED.idLot INTO @tab
+						VALUES (GETDATE(), 'Attente', 'Attente', @modele, @quantite);
+					SELECT @idLot = idLot FROM @tab;
 					SET @codeRetour = 0;
 					SET @messageRetour = 'Lot ajouté';
 				END
