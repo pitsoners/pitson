@@ -41,4 +41,25 @@ public class Tools
 		}
 		return ok ;
 	}
+	
+	    /**
+     * Fonction qui permet de vérifier qu'une chaine de caractère est un Int
+     *
+     * @param verifInt verifEntier est la chaine à vérifier
+     * @return retourne vrai si la chaine est un Int
+     */
+    public static boolean estInt(String verifInt)
+    {
+        boolean ok;
+        try
+        {
+            Integer.parseInt(verifInt);
+            ok = true;
+        }
+        catch (Exception e)
+        {
+            ok = false;
+        }
+        return ok;
+    }
 }
