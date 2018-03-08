@@ -1084,26 +1084,21 @@ AS
 			set @return = 1;
 			set @msg = 'Quantitée sortie invalide !'
 		end
-
-		else if Exists (SELECT qtStock FROM Stock where Stock.idModele = @idModele AND Stock.idCategorie = @idCategorie)
-			begin
-				if @qtSortie > (SELECT qtStock FROM Stock where Stock.idModele = @idModele AND Stock.idCategorie = @idCategorie)
-				begin
-					set @return = 2;
-					set @msg = 'Stock insuffisant !'
-				end
-			end
-
 		else if not exists(
 							SELECT idModele, idCategorie
 							FROM Stock
 							where idModele = @idModele	AND idCategorie = @idCategorie
 							)
-		begin
-			set @return = 2;
-			set @msg = 'Pas de stock pour ce modele et cette categorie !'
-		end
+			begin
+				set @return = 2;
+				set @msg = 'Pas de stock pour ce modele et cette categorie !'
+			end
 
+		else if @qtSortie > (SELECT qtStock FROM Stock where Stock.idModele = @idModele AND Stock.idCategorie = @idCategorie)
+			begin
+				set @return = 2;
+				set @msg = 'Stock insuffisant !'
+			end
 		else if @idCategorie <> 'Petit' AND @idCategorie <> 'Moyen' AND @idCategorie <> 'Grand' 
 		begin
 			set @return = 2;
@@ -1126,7 +1121,6 @@ AS
 	end catch
 
 	RETURN @return;
-
 GO
 
 /*-- ==========================================================
