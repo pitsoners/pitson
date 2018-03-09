@@ -596,6 +596,8 @@ BEGIN
 		END TRY
 		BEGIN CATCH
 			-- si une erreur se produit, c'est que l'utilisateur n'existait pas.
+			SET @codeRetour = 2;
+			SET @messageRetour = 'L''employe ''' + @employe + ''' n''existe pas.';
 		END CATCH
 		-- création de l'utilisateur
 		BEGIN TRY
@@ -609,12 +611,14 @@ BEGIN
 				SET @codeRetour = 0;
 				SET @messageRetour = 'L''utilisateur ''' + @employe + ''' est affecté au role ''' + @role + '''.';
 			END
-		ELSE
+		ELSE IF @codeRetour <> 2 -- si l'employé n'existait pas
 			BEGIN
 				SET @codeRetour = 0;
 				SET @messageRetour = 'L''utilisateur ''' + @employe + ''' a bien été supprimé.';
 				COMMIT TRANSACTION;
 			END
+		ELSE
+			ROLLBACK TRANSACTION;
 		END TRY
 		BEGIN CATCH
 			-- si erreur creation, abandon!
