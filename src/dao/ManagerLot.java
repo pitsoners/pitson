@@ -263,4 +263,35 @@ public class ManagerLot
         return ok;
     }
 
+        /**
+     * Cette méthode permet de récupérer les information d'un lot à partir d'un
+     * ID
+     *
+     * @param id est l'id du Lot dont on veut les informations
+     * @return retourne le Lot de l'id donné
+     */
+    public static Lot getLotFromId(int id)
+    {
+        Lot lot = null;
+        try
+        {
+            Connection connection = SQLConnection.getConnection();
+            CallableStatement cs = connection.prepareCall("{SELECT * FROM Lot WHERE idLot = ?}");
+            cs.setInt(1, id);
+
+            lot.setIdLot(cs.getInt(1));
+            lot.setDateDemande(cs.getDate(2));
+            lot.setDateProduction(cs.getDate(3));
+            lot.setEtatProduction(cs.getString(4));
+            lot.setEtatControle(cs.getString(5));
+            lot.setIdModele(cs.getString(6));
+            lot.setIdPresse(cs.getInt(7));
+            lot.setNbrPieceDemande(cs.getInt(24));
+        }
+        catch (SQLException ex)
+        {
+            Logger.getLogger(ManagerLot.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return lot;
+    }
 }
