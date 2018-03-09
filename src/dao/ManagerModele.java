@@ -251,4 +251,38 @@ public class ManagerModele {
         }
         return listeIdModele;
     }
+    
+     private static final String SELECT_SUM_PROD_MODELE = "SELECT SUM(nbrPieceDemande) FROM Lot WHERE idModele = ? AND etatProduction <> 'Termine'";
+
+    /**
+     * Cette méthode permet de récupérer la somme des quantité de pièces en
+     * production pour un Model donné
+     *
+     * @param id est l'id du modèle dont on veut le total de pièce
+     * @return retourne le total de pièces en production
+     */
+    public static int getQuantiteEnProd(String id)
+    {
+        int total = 0;
+        Connection connection;
+        try
+        {
+            connection = SQLConnection.getConnection();
+            CallableStatement cs = connection.prepareCall(SELECT_SUM_PROD_MODELE);
+            cs.setString(1, id);
+            if (cs.execute())
+            {
+                ResultSet rs = cs.executeQuery();
+                while (rs.next())
+                {
+                    total = total + rs.getInt(1);
+                }
+            }
+        }
+        catch (SQLException ex)
+        {
+            Logger.getLogger(ManagerStock.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return total;
+    }
 }
