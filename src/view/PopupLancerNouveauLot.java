@@ -5,16 +5,27 @@
  */
 package view;
 
+import entity.Lot;
+import javax.swing.JOptionPane;
+import model.ModelComboModele;
+import dao.ManagerLot;
+import dao.ManagerModele;
+import dao.ManagerStock;
+import java.util.ArrayList;
+import util.ReturnDataBase;
+
 /**
  *
  * @author denis
  */
-public class PopupLancerNouveauLot extends javax.swing.JDialog {
+public class PopupLancerNouveauLot extends javax.swing.JDialog
+{
 
     /**
      * Creates new form PopupLancerNouveauLot
      */
-    public PopupLancerNouveauLot(java.awt.Frame parent, boolean modal) {
+    public PopupLancerNouveauLot(java.awt.Frame parent, boolean modal)
+    {
         super(parent, modal);
         initComponents();
     }
@@ -26,7 +37,8 @@ public class PopupLancerNouveauLot extends javax.swing.JDialog {
      */
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
+    private void initComponents()
+    {
 
         comboboxModeles = new javax.swing.JComboBox();
         labelModele = new javax.swing.JLabel();
@@ -37,10 +49,19 @@ public class PopupLancerNouveauLot extends javax.swing.JDialog {
         labelQuantiteProductionNombre = new javax.swing.JLabel();
         labelQuantiteStockNombre = new javax.swing.JLabel();
         buttonLancerLot = new javax.swing.JButton();
-        buttonAnnuler = new javax.swing.JButton();
+        buttonRetour = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Lancer un nouveau lot");
+
+        comboboxModeles.setModel(new ModelComboModele());
+        comboboxModeles.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
+                comboboxModelesActionPerformed(evt);
+            }
+        });
 
         labelModele.setText("Modèle :");
 
@@ -51,8 +72,22 @@ public class PopupLancerNouveauLot extends javax.swing.JDialog {
         labelQuantiteStock.setText("Quantité en stock :");
 
         buttonLancerLot.setText("Lancer le lot");
+        buttonLancerLot.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
+                buttonLancerLotActionPerformed(evt);
+            }
+        });
 
-        buttonAnnuler.setText("Annuler");
+        buttonRetour.setText("Retour");
+        buttonRetour.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
+                buttonRetourActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -80,7 +115,7 @@ public class PopupLancerNouveauLot extends javax.swing.JDialog {
                 .addGap(30, 30, 30)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(buttonLancerLot, javax.swing.GroupLayout.DEFAULT_SIZE, 146, Short.MAX_VALUE)
-                    .addComponent(buttonAnnuler, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(buttonRetour, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap(23, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -97,10 +132,9 @@ public class PopupLancerNouveauLot extends javax.swing.JDialog {
                     .addComponent(textfieldQuantite))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(buttonAnnuler, javax.swing.GroupLayout.DEFAULT_SIZE, 35, Short.MAX_VALUE)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addComponent(labelQuantiteProductionNombre, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(labelQuantiteProduction, javax.swing.GroupLayout.DEFAULT_SIZE, 35, Short.MAX_VALUE)))
+                    .addComponent(buttonRetour, javax.swing.GroupLayout.DEFAULT_SIZE, 35, Short.MAX_VALUE)
+                    .addComponent(labelQuantiteProductionNombre, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(labelQuantiteProduction, javax.swing.GroupLayout.DEFAULT_SIZE, 35, Short.MAX_VALUE))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(labelQuantiteStock, javax.swing.GroupLayout.DEFAULT_SIZE, 35, Short.MAX_VALUE)
@@ -111,40 +145,82 @@ public class PopupLancerNouveauLot extends javax.swing.JDialog {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void buttonLancerLotActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_buttonLancerLotActionPerformed
+    {//GEN-HEADEREND:event_buttonLancerLotActionPerformed
+        ReturnDataBase retour;
+        Lot lot = recupereLot();
+        retour = ManagerLot.lancerLot(lot);
+        if (retour.getCode() == 0)
+        {
+            JOptionPane.showMessageDialog(this, retour.getMessage());
+        }
+        else
+        {
+            JOptionPane.showMessageDialog(this, "Code = " + retour.getCode() + "\nMessage = " + retour.getMessage());
+        }
+    }//GEN-LAST:event_buttonLancerLotActionPerformed
+
+    private void buttonRetourActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_buttonRetourActionPerformed
+    {//GEN-HEADEREND:event_buttonRetourActionPerformed
+        this.dispose();
+    }//GEN-LAST:event_buttonRetourActionPerformed
+
+    private void comboboxModelesActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_comboboxModelesActionPerformed
+    {//GEN-HEADEREND:event_comboboxModelesActionPerformed
+        labelQuantiteProductionNombre.setText(ManagerModele.getQuantiteEnProd(comboboxModeles.getSelectedItem().toString()) + " pièces");
+        labelQuantiteStockNombre.setText(ManagerStock.getQuantiteEnStock(comboboxModeles.getSelectedItem().toString()) + " caisses");
+    }//GEN-LAST:event_comboboxModelesActionPerformed
+
     /**
      * @param args the command line arguments
      */
-    public static void main(String args[]) {
+    public static void main(String args[])
+    {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
          * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
          */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
+        try
+        {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels())
+            {
+                if ("Nimbus".equals(info.getName()))
+                {
                     javax.swing.UIManager.setLookAndFeel(info.getClassName());
                     break;
                 }
             }
-        } catch (ClassNotFoundException ex) {
+        }
+        catch (ClassNotFoundException ex)
+        {
             java.util.logging.Logger.getLogger(PopupLancerNouveauLot.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
+        }
+        catch (InstantiationException ex)
+        {
             java.util.logging.Logger.getLogger(PopupLancerNouveauLot.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
+        }
+        catch (IllegalAccessException ex)
+        {
             java.util.logging.Logger.getLogger(PopupLancerNouveauLot.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+        }
+        catch (javax.swing.UnsupportedLookAndFeelException ex)
+        {
             java.util.logging.Logger.getLogger(PopupLancerNouveauLot.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
 
         /* Create and display the dialog */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
+        java.awt.EventQueue.invokeLater(new Runnable()
+        {
+            public void run()
+            {
                 PopupLancerNouveauLot dialog = new PopupLancerNouveauLot(new javax.swing.JFrame(), true);
-                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
+                dialog.addWindowListener(new java.awt.event.WindowAdapter()
+                {
                     @Override
-                    public void windowClosing(java.awt.event.WindowEvent e) {
+                    public void windowClosing(java.awt.event.WindowEvent e)
+                    {
                         System.exit(0);
                     }
                 });
@@ -154,8 +230,8 @@ public class PopupLancerNouveauLot extends javax.swing.JDialog {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton buttonAnnuler;
     private javax.swing.JButton buttonLancerLot;
+    private javax.swing.JButton buttonRetour;
     private javax.swing.JComboBox comboboxModeles;
     private javax.swing.JLabel labelModele;
     private javax.swing.JLabel labelQuantite;
@@ -165,4 +241,20 @@ public class PopupLancerNouveauLot extends javax.swing.JDialog {
     private javax.swing.JLabel labelQuantiteStockNombre;
     private javax.swing.JTextField textfieldQuantite;
     // End of variables declaration//GEN-END:variables
+
+    public Lot recupereLot()
+    {
+        Lot lot = new Lot();
+        lot.setIdModele((String) comboboxModeles.getSelectedItem());
+        if (util.Tools.estInt(textfieldQuantite.getText()))
+        {
+            lot.setNbrPieceDemande(Integer.parseInt(textfieldQuantite.getText()));
+        }
+        else
+        {
+            JOptionPane.showMessageDialog(this, "Quantité Incorrecte");
+        }
+        
+        return lot;
+    }
 }

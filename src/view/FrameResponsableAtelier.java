@@ -5,16 +5,24 @@
  */
 package view;
 
+import javax.swing.JDialog;
+import javax.swing.table.TableModel;
+import model.LotEnCoursModel;
+import render.RendererLotEnCours;
+import view.PopupLancerNouveauLot;
+
 /**
  *
  * @author denis
  */
-public class FrameResponsableAtelier extends javax.swing.JFrame {
+public class FrameResponsableAtelier extends javax.swing.JFrame
+{
 
     /**
      * Creates new form FrameResponsableAtelier
      */
-    public FrameResponsableAtelier() {
+    public FrameResponsableAtelier()
+    {
         initComponents();
     }
 
@@ -25,16 +33,17 @@ public class FrameResponsableAtelier extends javax.swing.JFrame {
      */
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
+    private void initComponents()
+    {
 
         labelLotsEnCours = new javax.swing.JLabel();
         labelStock = new javax.swing.JLabel();
         jScrollPane2 = new javax.swing.JScrollPane();
         tableStock = new javax.swing.JTable();
-        jScrollPane3 = new javax.swing.JScrollPane();
-        tableLotsEnCours = new javax.swing.JTable();
         buttonRetour = new javax.swing.JButton();
-        buttonValider = new javax.swing.JButton();
+        buttonLancerLot = new javax.swing.JButton();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        listeLotEnCour = new javax.swing.JList();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Gestion Atelier");
@@ -45,13 +54,23 @@ public class FrameResponsableAtelier extends javax.swing.JFrame {
         labelStock.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         labelStock.setText("Stock :");
 
+        tableStock.setModel(new model.ModelTableStock());
         jScrollPane2.setViewportView(tableStock);
-
-        jScrollPane3.setViewportView(tableLotsEnCours);
 
         buttonRetour.setText("Retour");
 
-        buttonValider.setText("Valider");
+        buttonLancerLot.setText("Lancer Lot");
+        buttonLancerLot.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
+                buttonLancerLotActionPerformed(evt);
+            }
+        });
+
+        listeLotEnCour.setModel(new model.LotEnCoursModel());
+        listeLotEnCour.setCellRenderer(new RendererLotEnCours());
+        jScrollPane1.setViewportView(listeLotEnCour);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -63,12 +82,12 @@ public class FrameResponsableAtelier extends javax.swing.JFrame {
                         .addGap(0, 428, Short.MAX_VALUE)
                         .addComponent(buttonRetour, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(buttonValider, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(buttonLancerLot, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                         .addGap(35, 35, 35)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(labelLotsEnCours, javax.swing.GroupLayout.DEFAULT_SIZE, 259, Short.MAX_VALUE)
-                            .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                            .addComponent(labelLotsEnCours, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jScrollPane1))
                         .addGap(40, 40, 40)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(labelStock, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -83,65 +102,37 @@ public class FrameResponsableAtelier extends javax.swing.JFrame {
                     .addComponent(labelStock, javax.swing.GroupLayout.DEFAULT_SIZE, 48, Short.MAX_VALUE)
                     .addComponent(labelLotsEnCours, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                        .addGap(18, 18, 18))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 394, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jScrollPane1)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 394, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(buttonRetour, javax.swing.GroupLayout.DEFAULT_SIZE, 43, Short.MAX_VALUE)
-                    .addComponent(buttonValider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(buttonLancerLot, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(FrameResponsableAtelier.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(FrameResponsableAtelier.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(FrameResponsableAtelier.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(FrameResponsableAtelier.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+    private void buttonLancerLotActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_buttonLancerLotActionPerformed
+    {//GEN-HEADEREND:event_buttonLancerLotActionPerformed
+        if (evt.getSource() == buttonLancerLot)
+        {
+                PopupLancerNouveauLot popupLancerNouveauLot = new view.PopupLancerNouveauLot(this, rootPaneCheckingEnabled);
+                popupLancerNouveauLot.setVisible(true);
         }
-        //</editor-fold>
+    }//GEN-LAST:event_buttonLancerLotActionPerformed
 
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new FrameResponsableAtelier().setVisible(true);
-            }
-        });
-    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton buttonLancerLot;
     private javax.swing.JButton buttonRetour;
-    private javax.swing.JButton buttonValider;
+    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JLabel labelLotsEnCours;
     private javax.swing.JLabel labelStock;
-    private javax.swing.JTable tableLotsEnCours;
+    private javax.swing.JList listeLotEnCour;
     private javax.swing.JTable tableStock;
     // End of variables declaration//GEN-END:variables
 }

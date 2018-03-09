@@ -52,7 +52,7 @@
               <EmptySpace min="-2" pref="30" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" max="-2" attributes="0">
                   <Component id="buttonLancerLot" pref="146" max="32767" attributes="0"/>
-                  <Component id="buttonAnnuler" max="32767" attributes="0"/>
+                  <Component id="buttonRetour" max="32767" attributes="0"/>
               </Group>
               <EmptySpace pref="23" max="32767" attributes="0"/>
           </Group>
@@ -74,11 +74,9 @@
               </Group>
               <EmptySpace type="separate" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                  <Component id="buttonAnnuler" pref="35" max="32767" attributes="0"/>
-                  <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                      <Component id="labelQuantiteProductionNombre" max="32767" attributes="0"/>
-                      <Component id="labelQuantiteProduction" pref="35" max="32767" attributes="0"/>
-                  </Group>
+                  <Component id="buttonRetour" pref="35" max="32767" attributes="0"/>
+                  <Component id="labelQuantiteProductionNombre" max="32767" attributes="0"/>
+                  <Component id="labelQuantiteProduction" pref="35" max="32767" attributes="0"/>
               </Group>
               <EmptySpace type="separate" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" max="-2" attributes="0">
@@ -92,6 +90,14 @@
   </Layout>
   <SubComponents>
     <Component class="javax.swing.JComboBox" name="comboboxModeles">
+      <Properties>
+        <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+          <Connection code="new ModelComboModele()" type="code"/>
+        </Property>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="comboboxModelesActionPerformed"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JLabel" name="labelModele">
       <Properties>
@@ -123,11 +129,17 @@
       <Properties>
         <Property name="text" type="java.lang.String" value="Lancer le lot"/>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="buttonLancerLotActionPerformed"/>
+      </Events>
     </Component>
-    <Component class="javax.swing.JButton" name="buttonAnnuler">
+    <Component class="javax.swing.JButton" name="buttonRetour">
       <Properties>
-        <Property name="text" type="java.lang.String" value="Annuler"/>
+        <Property name="text" type="java.lang.String" value="Retour"/>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="buttonRetourActionPerformed"/>
+      </Events>
     </Component>
   </SubComponents>
 </Form>
