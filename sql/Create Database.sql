@@ -160,19 +160,17 @@ GO
 
 /* Création des vues */
 
-CREATE VIEW LotsAttenteControle
-AS
-	SELECT idLot, dateDemande, idModele
-	FROM Lot
-	WHERE etatControle = 'Attente' AND etatProduction <> 'Attente';
+--Vue qui retourne les lots à controler
+CREATE VIEW LotsAControler AS
+SELECT l.idLot, l.idModele, l.etatControle, l.nbrPieceDemande,
+	(
+		SELECT COUNT(p.idPiece)
+		FROM Piece p
+		WHERE p.idLot = l.idLot
+	) AS pieceControlees
+FROM Lot l
+WHERE l.etatProduction <> 'Attente'
 GO
-
-CREATE VIEW LotsEnCoursControle
-AS
-	SELECT idLot, dateDemande, idModele, dateProduction, idPresse
-	FROM Lot
-	WHERE etatControle = 'EnCours';
-go
 
 CREATE VIEW LotsAttenteProduction
 AS
