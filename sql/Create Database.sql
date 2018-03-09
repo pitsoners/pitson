@@ -188,6 +188,16 @@ AS
 	WHERE etatProduction = 'EnCours';
 go
 
+
+--vue qui retourne les utilisateurs de l'application et leur role, hormis l'utilisateur propriétaire de la base de données
+CREATE VIEW utilisateursRoles
+AS
+SELECT u.name as utilisateur, r.name as role
+FROM sys.database_principals u
+	JOIN sys.database_role_members rm ON u.principal_id = rm.member_principal_id
+	JOIN sys.database_principals r ON rm.role_principal_id = r.principal_id
+WHERE r.name IN ('ResponsableApplication','ResponsableAtelier', 'ResponsablePresse', 'Magasinier', 'Controleur', 'ResponsableQualite');
+
 --===============================================================================
 -- View qui permet de vérifier si il y a des machines libres
 --===============================================================================
@@ -755,7 +765,7 @@ AS
 		BEGIN
 			UPDATE Lot 
 			SET Lot.etatProduction = 'EnCours',
-				 Lot.idPresse = @idMachine
+				 Lot.idPresse = @idMachine,
 				 Lot.dateProduction = GETDATE()
 			WHERE Lot.idLot = @idLot
 
