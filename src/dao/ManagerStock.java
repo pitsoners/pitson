@@ -172,4 +172,36 @@ public class ManagerStock
 
         return retour;
     }
+    
+        /**
+     * Cette méthode permet de récupérer la quantité de caisse en stock pour un
+     * modele donné
+     *
+     * @param id est l'id du modele dont on veut le stock
+     * @return retourne la quantité de caisses en stock
+     */
+    public static int getQuantiteEnStock(String id)
+    {
+        int total = 0;
+        Connection connection;
+        try
+        {
+            connection = SQLConnection.getConnection();
+            CallableStatement cs = connection.prepareCall("SELECT qtStock FROM Stock WHERE idModele = ?");
+            cs.setString(1, id);
+            if (cs.execute())
+            {
+                ResultSet rs = cs.executeQuery();
+                while (rs.next())
+                {
+                    total = total + rs.getInt(1);
+                }
+            }
+        }
+        catch (SQLException ex)
+        {
+            Logger.getLogger(ManagerStock.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return total;
+    }
 }
