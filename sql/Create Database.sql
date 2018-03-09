@@ -652,11 +652,11 @@ AS
 			SET @msg = 'Ce lot n''existe pas';
 		END
 		-- Vérifier que la production a été lancée
-		ELSE IF NOT EXISTS (
+		ELSE IF EXISTS (
 							SELECT Lot.idLot
 							FROM Lot
 							WHERE Lot.idLot = @IdLot
-							AND Lot.etatProduction = 'EnCours'
+							AND Lot.etatProduction <> 'Attente'
 							)
 		BEGIN 
 			SET @retour = 2;
