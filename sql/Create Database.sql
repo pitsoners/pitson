@@ -567,10 +567,18 @@ BEGIN
 			SET @codeRetour = 1;
 			SET @messageRetour = 'Le paramètre 1 (@employe) ne peut être null';
 		END
-	ELSE IF @employe = 'dbo'
+	ELSE IF @employe = 'dbo' OR @employe IN
+		(
+			SELECT l.name
+			FROM sys.database_principals u
+			JOIN sys.server_principals l ON l.sid = u.sid
+			JOIN sys.database_role_members rm ON u.principal_id = rm.member_principal_id
+			JOIN sys.database_principals r ON rm.role_principal_id = r.principal_id
+			WHERE r.name = 'db_owner'
+		)
 		BEGIN
 			SET @codeRetour = 2;
-			SET @messageRetour = 'Le paramètre 1 (@employe) ne peut être ''dbo''. Le propriétaire de la base est un utilisateur réservé.';
+			SET @messageRetour = 'Le paramètre 1 (@employe = ''' + @employe + ''') ne peut être le propriétaire de la base de données car c''est un utilisateur réservé.';
 		END
 	ELSE IF @role IS NOT NULL AND @role NOT IN ('ResponsableApplication', 'ResponsableAtelier', 'ResponsablePresse', 'Controleur', 'Magasinier', 'ResponsableQualite')
 		BEGIN
