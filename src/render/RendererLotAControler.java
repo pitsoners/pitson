@@ -22,7 +22,7 @@ public class RendererLotAControler implements ListCellRenderer<Lot>
     @Override
     public Component getListCellRendererComponent(JList<? extends Lot> list, Lot lot, int index, boolean isSelected, boolean cellHasFocus)
     {
-        JLabel lab = new JLabel("Lot n° "+lot.getIdLot()+" - ["+lot.getIdModele()+"] - "+ "Controle en "+ lot.getEtatControle()+ " - "
+        JLabel lab = new JLabel("Lot n° "+lot.getIdLot()+" - ["+lot.getIdModele()+"] - "+ "Controle : "+ lot.getEtatControle()+ " - "
                                 +lot.getNbrPieceDemande() + " pièces demandées"+" - "+lot.getPiecesControlees() + " pièces controlées");
         lab.setOpaque(true);
         if (isSelected)
