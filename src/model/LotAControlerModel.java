@@ -36,4 +36,18 @@ public class LotAControlerModel extends AbstractListModel<Lot>
         return listLot.get(index);
     }
     
+      public void removeLot(Lot l) 
+    {
+        if(l != null)
+        {
+            int index = listLot.indexOf(l);
+            listLot.remove(l);
+            fireIntervalRemoved(listLot, index, index);
+        }
+    }
+    
+    public void refreshIndex(int index)
+    {
+        fireContentsChanged(this, index, index);
+    }
 }
