@@ -294,4 +294,39 @@ public class ManagerLot
         }
         return lot;
     }
+    
+    /**
+     * Méthode permettant le demarrage du controle d'un lot
+     * @param lotControle
+     * @return 
+     */
+    public static boolean demarrerControle(Lot lotControle)
+    {
+        boolean ok = false;
+        try
+        {
+            Connection co = SQLConnection.getConnection();
+            CallableStatement cs = co.prepareCall("{? = call sp_demarrerControle(?,?)}");
+            cs.registerOutParameter(1, java.sql.Types.INTEGER);
+            cs.registerOutParameter(3, java.sql.Types.VARCHAR);
+            cs.setInt(2, lotControle.getIdLot());
+            cs.executeUpdate();
+            if(cs.getByte(1) != 0)
+            {
+                System.out.println("Erreur lors du demarrage du controle :" + cs.getByte(1) + "\nMessage d'erreur : " + cs.getString(3));
+            }
+            else
+            {
+                lotControle.setEtatControle("EnCours");
+                ok = true;
+            }
+        }
+        catch(Exception e)
+        {
+            System.out.println(e);
+        }
+        
+        return ok;
+        
+    }
 }
