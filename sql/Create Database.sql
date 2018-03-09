@@ -656,7 +656,7 @@ AS
 							SELECT Lot.idLot
 							FROM Lot
 							WHERE Lot.idLot = @IdLot
-							AND Lot.etatProduction <> 'Attente'
+							AND Lot.etatProduction = 'Attente'
 							)
 		BEGIN 
 			SET @retour = 2;
