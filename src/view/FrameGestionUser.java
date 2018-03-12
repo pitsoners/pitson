@@ -5,6 +5,12 @@
  */
 package view;
 
+import dao.ManagerDatabaseUser;
+import entity.DatabaseUser;
+import javax.swing.JOptionPane;
+import model.ComboBoxUserModel;
+import util.ReturnDataBase;
+
 /**
  *
  * @author brun
@@ -33,12 +39,12 @@ public class FrameGestionUser extends javax.swing.JFrame
         labelUser = new javax.swing.JLabel();
         labelRole = new javax.swing.JLabel();
         comboBoxRole = new javax.swing.JComboBox();
-        textFieldUser = new javax.swing.JTextField();
         buttonSupprimerUser = new javax.swing.JButton();
         buttonAffecter = new javax.swing.JButton();
         labelTraiterUser = new javax.swing.JLabel();
+        comboBoxUser = new javax.swing.JComboBox<>();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Gestion Utilisateur");
 
         labelUser.setText("User");
@@ -46,19 +52,38 @@ public class FrameGestionUser extends javax.swing.JFrame
 
         labelRole.setText("Rôle");
 
-        textFieldUser.addActionListener(new java.awt.event.ActionListener()
+        comboBoxRole.setModel(new model.ComboBoxRoleModel());
+        comboBoxRole.setSelectedIndex(0);
+
+        buttonSupprimerUser.setText("Supprimer l'Utilisateur");
+        buttonSupprimerUser.addActionListener(new java.awt.event.ActionListener()
         {
             public void actionPerformed(java.awt.event.ActionEvent evt)
             {
-                textFieldUserActionPerformed(evt);
+                buttonSupprimerUserActionPerformed(evt);
             }
         });
 
-        buttonSupprimerUser.setText("Supprimer l'Utilisateur");
-
         buttonAffecter.setText("Affecter le Rôle");
+        buttonAffecter.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
+                buttonAffecterActionPerformed(evt);
+            }
+        });
 
         labelTraiterUser.setText("Taiter un Utilisateur");
+
+        comboBoxUser.setEditable(true);
+        comboBoxUser.setModel(new model.ComboBoxUserModel());
+        comboBoxUser.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
+                comboBoxUserActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -69,17 +94,13 @@ public class FrameGestionUser extends javax.swing.JFrame
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(labelUser, javax.swing.GroupLayout.DEFAULT_SIZE, 92, Short.MAX_VALUE)
                     .addComponent(labelRole, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(94, 94, 94)
-                        .addComponent(textFieldUser, javax.swing.GroupLayout.PREFERRED_SIZE, 163, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap(84, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(comboBoxRole, javax.swing.GroupLayout.PREFERRED_SIZE, 163, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(84, 84, 84))))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(comboBoxRole, 0, 163, Short.MAX_VALUE)
+                    .addComponent(comboBoxUser, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(84, 84, 84))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap(203, Short.MAX_VALUE)
                 .addComponent(buttonAffecter)
                 .addGap(18, 18, 18)
                 .addComponent(buttonSupprimerUser)
@@ -97,7 +118,7 @@ public class FrameGestionUser extends javax.swing.JFrame
                 .addGap(54, 54, 54)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(labelUser)
-                    .addComponent(textFieldUser, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(comboBoxUser, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(26, 26, 26)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(labelRole)
@@ -112,10 +133,44 @@ public class FrameGestionUser extends javax.swing.JFrame
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void textFieldUserActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_textFieldUserActionPerformed
-    {//GEN-HEADEREND:event_textFieldUserActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_textFieldUserActionPerformed
+    private void buttonAffecterActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_buttonAffecterActionPerformed
+    {//GEN-HEADEREND:event_buttonAffecterActionPerformed
+        DatabaseUser dbu = new DatabaseUser((String)comboBoxUser.getSelectedItem(), (String)comboBoxRole.getSelectedItem());
+	ReturnDataBase ret = ManagerDatabaseUser.updateDatabaseUser(dbu);
+	if (ret.getCode() == 0)
+	{
+	    ((ComboBoxUserModel)comboBoxUser.getModel()).setUser(dbu);
+	    JOptionPane.showMessageDialog(this, "Utilisateur " + dbu + " mis à jour avec succès.", "Mise à jour utilisateur", JOptionPane.INFORMATION_MESSAGE);
+	}
+	else
+	{
+	    JOptionPane.showMessageDialog(this, "Une erreur est survenue : " + ret, "Mise à jour d'utilisateur", JOptionPane.ERROR_MESSAGE);
+	}
+    }//GEN-LAST:event_buttonAffecterActionPerformed
+
+    private void comboBoxUserActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_comboBoxUserActionPerformed
+    {//GEN-HEADEREND:event_comboBoxUserActionPerformed
+        String role = ((ComboBoxUserModel)comboBoxUser.getModel()).getSelectedRole();
+	if (role != null)
+	{
+	    comboBoxRole.setSelectedItem(role);
+	}
+    }//GEN-LAST:event_comboBoxUserActionPerformed
+
+    private void buttonSupprimerUserActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_buttonSupprimerUserActionPerformed
+    {//GEN-HEADEREND:event_buttonSupprimerUserActionPerformed
+        String user = (String)comboBoxUser.getSelectedItem();
+	ReturnDataBase ret = ManagerDatabaseUser.deleteDatabaseUser(user);
+	if (ret.getCode() == 0)
+	{
+	    ((ComboBoxUserModel)comboBoxUser.getModel()).removeUser(user);
+	    JOptionPane.showMessageDialog(this, "L'utilisateur " + user + " a été supprimé.", "Suppresionn d'utilisateur", JOptionPane.INFORMATION_MESSAGE);
+	}
+	else
+	{
+	    JOptionPane.showMessageDialog(this, "Une erreur est survenur : " + ret, "Suppression d'utilisateur", JOptionPane.ERROR_MESSAGE);
+	}
+    }//GEN-LAST:event_buttonSupprimerUserActionPerformed
 
     /**
      * @param args the command line arguments
@@ -170,9 +225,9 @@ public class FrameGestionUser extends javax.swing.JFrame
     private javax.swing.JButton buttonAffecter;
     private javax.swing.JButton buttonSupprimerUser;
     private javax.swing.JComboBox comboBoxRole;
+    private javax.swing.JComboBox<String> comboBoxUser;
     private javax.swing.JLabel labelRole;
     private javax.swing.JLabel labelTraiterUser;
     private javax.swing.JLabel labelUser;
-    private javax.swing.JTextField textFieldUser;
     // End of variables declaration//GEN-END:variables
 }
