@@ -1300,7 +1300,7 @@ AS
 						SELECT lot.idLot
 						FROM Lot 
 						WHERE Lot.idLot = @IdLot
-						AND Lot.etatControle = 'EnCour'
+						AND Lot.etatControle = 'EnCours'
 						)
 		BEGIN
 			SET @retour = 2;
@@ -2094,3 +2094,51 @@ AS
 	IF @@ROWCOUNT = 0
 		INSERT INTO Cumul (idLot, idCategorie, nbrPiece) SELECT inserted.idLot, inserted.idCategorie, 1 FROM inserted;
 GO
+
+GRANT SELECT ON InfoBase TO ResponsableApplication;
+GRANT SELECT ON InfoBase TO Controleur;
+GRANT SELECT ON InfoBase TO Magasinier;
+GRANT SELECT ON InfoBase TO ResponsableAtelier;
+GRANT SELECT ON InfoBase TO ResponsablePresse;
+GRANT SELECT ON InfoBase TO ResponsableQualite;
+
+GRANT EXECUTE ON sp_annulerLot TO ResponsableAtelier;
+GRANT EXECUTE ON sp_changerStatutMachine TO ResponsableApplication;
+GRANT EXECUTE ON sp_changerStatutModele TO ResponsableApplication;
+GRANT EXECUTE ON sp_creerMachine TO ResponsableApplication;
+GRANT EXECUTE ON sp_creerModele TO ResponsableApplication;
+GRANT EXECUTE ON sp_demarrerControle TO Controleur;
+GRANT EXECUTE ON sp_demarrerProd TO ResponsablePresse;
+GRANT EXECUTE ON sp_entreeStock TO Magasinier;
+GRANT EXECUTE ON sp_lancerLot TO ResponsableAtelier;
+GRANT EXECUTE ON sp_modifierBornesCategories TO ResponsableApplication;
+GRANT EXECUTE ON sp_modifierLot TO ResponsableAtelier;
+GRANT EXECUTE ON sp_renommerMachine TO ResponsableApplication;
+GRANT EXECUTE ON sp_renommerModele TO ResponsableApplication;
+GRANT EXECUTE ON sp_retournerRole TO ResponsableApplication;
+GRANT EXECUTE ON sp_retournerRole TO Controleur;
+GRANT EXECUTE ON sp_retournerRole TO Magasinier;
+GRANT EXECUTE ON sp_retournerRole TO ResponsableAtelier;
+GRANT EXECUTE ON sp_retournerRole TO ResponsablePresse;
+GRANT EXECUTE ON sp_retournerRole TO ResponsableQualite;
+GRANT EXECUTE ON sp_saisirPiece TO Controleur;
+GRANT EXECUTE ON sp_sortieStock TO Magasinier;
+GRANT EXECUTE ON sp_statLotDetail TO ResponsableQualite;
+GRANT EXECUTE ON sp_statPresse TO ResponsableQualite;
+GRANT EXECUTE ON sp_supprimerMachine TO ResponsableApplication;
+GRANT EXECUTE ON sp_supprimerModele TO ResponsableApplication;
+GRANT EXECUTE ON sp_terminerControle TO Controleur;
+GRANT EXECUTE ON sp_terminerProd TO ResponsablePresse;
+
+GRANT SELECT ON Modele TO Magasinier;
+GRANT SELECT ON Lot TO Magasinier;
+GRANT SELECT ON LotsEnCoursProduction TO ResponsableAtelier;
+GRANT SELECT ON LotsAttenteProduction TO ResponsableAtelier;
+GRANT SELECT ON Stock TO ResponsableAtelier;
+GRANT SELECT ON Lot TO ResponsableAtelier;
+GRANT SELECT ON Modele TO ResponsableAtelier;
+GRANT SELECT ON Modele TO ResponsableApplication;
+GRANT SELECT ON Machine TO ResponsableApplication;
+GRANT SELECT ON Stock TO ResponsableApplication;
+GRANT SELECT ON Lot TO ResponsableApplication;
+GRANT SELECT ON Categorie TO ResponsableApplication;
