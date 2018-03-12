@@ -11,6 +11,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import util.ReturnDataBase;
 import util.SQLConnection;
 
 /**
@@ -24,9 +25,9 @@ public class ManagerMachine
      * @param ma
      * @return 
      */
-    public static boolean creerMachine(Machine ma)
+    public static ReturnDataBase creerMachine(Machine ma)
     {
-        boolean ok = false;
+        ReturnDataBase rdb = null ;
         try
         {
             Connection co = SQLConnection.getConnection();
@@ -36,13 +37,13 @@ public class ManagerMachine
             cs.registerOutParameter(4, java.sql.Types.VARCHAR);
             cs.setString(2, ma.getLibellePresse());
             cs.executeUpdate();
-            if(cs.getByte(1) != 0)
+            rdb = new ReturnDataBase(cs.getByte(1), cs.getString(4));
+            if(rdb.getCode() != 0)
             {
-                System.out.println("Erreur lors de la création de la machine :" + cs.getByte(1) + "\nMessage d'erreur : " + cs.getString(4));
+                System.out.println(rdb);
             }
             else
             {
-                ok = true;
                 ma.setIdPresse(cs.getInt(3));
             }
         }
@@ -50,7 +51,7 @@ public class ManagerMachine
             {
                 System.out.println(e);
             }
-        return ok;
+        return rdb;
         
     }
 
@@ -127,9 +128,9 @@ public class ManagerMachine
      * @param newLibelle
      * @return 
      */
-    public static boolean renommerMachine(Machine aRenommer, String newLibelle)
+    public static ReturnDataBase renommerMachine(Machine aRenommer, String newLibelle)
     {
-        boolean ok = false;
+        ReturnDataBase rdb = null ;
         try
         {
             Connection co = SQLConnection.getConnection();
@@ -139,13 +140,13 @@ public class ManagerMachine
             cs.setInt(2, aRenommer.getIdPresse());
             cs.setString(3, newLibelle);
             cs.executeUpdate();
-            if(cs.getByte(1) != 0)
+            rdb = new ReturnDataBase(cs.getByte(1), cs.getString(4));
+            if(rdb.getCode() != 0)
             {
-                System.out.println("Erreur lors de du renommage : " + cs.getByte(1) + "\nMessage d'erreur : " + cs.getString(4));
+                System.out.println(rdb);
             }
             else
             {
-                ok = true;
                 aRenommer.setLibellePresse(newLibelle);
             }
         }
@@ -154,7 +155,7 @@ public class ManagerMachine
             System.out.println(e);
         }
         
-        return ok;
+        return rdb;
     }
 
     /**
@@ -163,8 +164,9 @@ public class ManagerMachine
      * @param enService
      * @return 
      */
-    public static boolean updateEnServiceMachine(Machine ma, boolean enService)
+    public static ReturnDataBase updateEnServiceMachine(Machine ma, boolean enService)
     {
+        ReturnDataBase rdb = null ;
         boolean ok = false;
         try
         {
@@ -175,13 +177,13 @@ public class ManagerMachine
             cs.setInt(2, ma.getIdPresse());
             cs.setBoolean(3, enService);
             cs.executeUpdate();
-            if(cs.getByte(1) != 0)
+            rdb = new ReturnDataBase(cs.getByte(1), cs.getString(4));
+            if(rdb.getCode() != 0)
             {
-                System.out.println("Erreur de la mise à jour du statut : " + cs.getByte(1) + "\nMessage d'erreur : " + cs.getString(4));
+                System.out.println(rdb);
             }
             else
             {
-                ok = true;
                 ma.setEnService(enService);
             }
         }
@@ -190,12 +192,12 @@ public class ManagerMachine
             System.out.println(e);
         }
         
-        return ok;
+        return rdb;
     }
     
-    public static boolean supprimerMachine(Machine aSupprimer)
+    public static ReturnDataBase supprimerMachine(Machine aSupprimer)
     {
-        boolean ok = false;
+        ReturnDataBase rdb = null ;
         try
         {
             Connection co = SQLConnection.getConnection();
@@ -204,13 +206,10 @@ public class ManagerMachine
             cs.registerOutParameter(3, java.sql.Types.VARCHAR);
             cs.setInt(2, aSupprimer.getIdPresse());
             cs.executeUpdate();
-            if(cs.getByte(1) != 0)
+            rdb = new ReturnDataBase(cs.getByte(1), cs.getString(4));
+            if(rdb.getCode() != 0)
             {
-                System.out.println("Erreur de suppression de la machine : " + cs.getByte(1) + "\nMessage d'erreur : " + cs.getString(4));
-            }
-            else
-            {
-                ok = true;
+                System.out.println(rdb);
             }
         }
         catch(Exception e)
@@ -218,6 +217,6 @@ public class ManagerMachine
             System.out.println(e);
         }
         
-        return ok;       
+        return rdb;       
     }
 }
