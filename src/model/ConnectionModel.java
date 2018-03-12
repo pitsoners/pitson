@@ -1,51 +1,235 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package model;
 
 import java.util.HashSet;
 import java.util.Set;
 import javax.swing.ComboBoxModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 import util.ConnectionHistory;
 import util.Database;
 
 /**
- * classe qui contient les modèles de données pour les combobox de selectiond d'utilisateur et de base de donnée à l'écran de
- * connexion. Les informations sont obtenues à partir de l'historique de connexion. ({@link util.ConnectionHistory})
+ * classe qui contient les modèles de données pour les combobox de selection
+ * d'utilisateur et de base de donnée à l'écran de connexion. Les informations
+ * sont obtenues à partir de l'historique de connexion.
+ * ({@link util.ConnectionHistory})
  *
  * @author Thierry
  */
 public class ConnectionModel
 {
     /**
-     * modèle de données pour le comboBox base de données
+     * l'utilisateur actuellement selectionné
      */
-    private final ComboBoxDatabaseModel m_databaseModel;
+    private String m_selectedUser;
     /**
-     * modèle de données pour le comboBox login
+     * la base de données actuellement selectionnée
      */
-    private final ComboBoxUserModel m_userModel;
+    private Database m_selectedDatabase;
+
+    /**
+     * ensemble d'écouteurs auxquels notifier une modification de la liste des utilisateurs
+     */
+    private final HashSet<ListDataListener> m_userListeners;
+    /**
+     * ensembel d'écouteurs auxquels notifier une modification de la liste des bases de données
+     */
+    private final HashSet<ListDataListener> m_databaseListeners;
+
+    /**
+     * le modele de données pour le combobox d'utilisateurs
+     */
+    private ComboBoxUserModel m_userModel;
+    /**
+     * le modèle de données pour le combobox des bases de données
+     */
+    private ComboBoxDatabaseModel m_databaseModel;
 
     /**
      * constructeur par défaut. initialise les deux modèles de données
      */
     public ConnectionModel()
     {
-	m_databaseModel = new ComboBoxDatabaseModel();
+	m_userListeners = new HashSet<>();
+	m_databaseListeners = new HashSet<>();
 	m_userModel = new ComboBoxUserModel();
+	m_databaseModel = new ComboBoxDatabaseModel();
+	m_selectedDatabase = new Database("", "");
+	setSelectedDatabase(ConnectionHistory.getInstance().getLastDatabase());
+	setSelectedUser(ConnectionHistory.getInstance().getLastUser());
+	new ConnectionModelHistoryListener();
     }
 
     /**
-     * retourne le modèle de données du combobox de selection de base de données
-     * @return le modèle de données du combobox de selection de base de données
+     * retourne le tableau de bases de données du modèle, récupéré a partir de l'historique de connexion
+     * @return le tableau de bases de données
      */
-    public ComboBoxDatabaseModel getDatabaseModel()
+    public Database[] getDatabases()
     {
-	return m_databaseModel;
+	return (Database[]) ConnectionHistory.getInstance().getDatabases().toArray();
     }
 
     /**
-     * retourne le modèle de données du comboBox de selection d'utilisateur
-     * @return le modèle de données du comboBox de selection d'utilisateur
+     * retourne le tableau d'utilisateurs qui se sont connectés a la base de données actuellement selectionnée, récupéré à partir de l'historique de connexion
+     * @return le tableau d'utilisateurs récemment connectés à la base de données actuellement sélectionnée
+     */
+    public String[] getUsers()
+    {
+	Set<String> users = ConnectionHistory.getInstance().getUsers(m_selectedDatabase);
+	return users == null ? new String[0] : users.toArray(new String[0]);
+    }
+
+    /**
+     * retourne le nombre de bases de données dans le modèle (obtenu depuis l'historique de connexion)
+     * @return le nombre de bases de données
+     */
+    public int getDatabaseCount()
+    {
+	return ConnectionHistory.getInstance().getDatabases().size();
+    }
+
+    /**
+     * retourne le nombre d'utilisateurs récemment connectés à la base de données actuellement selectionnée(obtenu à partir de l'historique de connexion)
+     * @return le nombre d'utilisateurs récemment connectés à la base de données actuellement selectionnée
+     */
+    public int getUserCount()
+    {
+	Set<String> users = ConnectionHistory.getInstance().getUsers(m_selectedDatabase);
+	return users == null ? 0 : users.size();
+    }
+
+    /**
+     * retourne l'utilisateur actuellement selectionné
+     * @return l'utilisateur actuellement selectionné
+     */
+    public String getSelectedUser()
+    {
+	return m_selectedUser;
+    }
+
+    /**
+     * retourne la base de données actuellement selectionnée
+     * @return la base de données actuellement selectionnée
+     */
+    public Database getSelectedDatabase()
+    {
+	return m_selectedDatabase;
+    }
+
+    /**
+     * modifie l'utilisateur actuellement selectionné
+     * @param user le nouvel utilisateur
+     */
+    private void setSelectedUser(String user)
+    {
+	m_selectedUser = user;
+    }
+
+    /**
+     * modifie la base de données actuellement selectionnée
+     * @param db la nouvelle base de données
+     */
+    private void setSelectedDatabase(Database db)
+    {
+	boolean change = m_selectedDatabase == null && db != null || !m_selectedDatabase.equals(db);
+	if (change)
+	{
+	    if (db != null)
+	    {
+		m_selectedDatabase.setName(db.getName());
+		m_selectedDatabase.setUrl(db.getUrl());
+	    } else
+	    {
+		m_selectedDatabase.setName("");
+		m_selectedDatabase.setUrl("");
+	    }
+	    fireUserListChange();
+	}
+    }
+
+    /**
+     * ajoute un écouteur qui sera notifié lorsqu'une modification sur la liste des utilisateurs intervient
+     * @param l l'écouteur à ajouter
+     */
+    private void addUserListDataListener(ListDataListener l)
+    {
+	if (l != null)
+	{
+	    m_userListeners.add(l);
+	}
+    }
+
+    /**
+     * retire un écouteur de modification de la liste des utilisateurs
+     * @param l l'écouteur à retirer
+     */
+    private void removeUserListDataListener(ListDataListener l)
+    {
+	if (l != null)
+	{
+	    m_userListeners.remove(l);
+	}
+    }
+
+    /**
+     * ajoute un écouteur qui sera notifié lorsqu'une modification sur la liste des bases de données intervient
+     * @param l l'écouteur à ajouter
+     */
+    private void addDatabaseListDataListener(ListDataListener l)
+    {
+	if (l != null)
+	{
+	    m_databaseListeners.add(l);
+	}
+    }
+
+    /**
+     * retire un écouteur de  modifications de la liste des bases de données
+     * @param l l'écouteur à retirer
+     */
+    private void removeDatabaseListDataListener(ListDataListener l)
+    {
+	if (l != null)
+	{
+	    m_databaseListeners.remove(l);
+	}
+    }
+
+    /**
+     * notifie les écouteurs abonnés qu'un changement a eu lieu sur la liste des utilisateurs
+     */
+    private void fireUserListChange()
+    {
+	int newSize = getUserCount();
+	ListDataEvent e = new ListDataEvent(this, ListDataEvent.CONTENTS_CHANGED, 0, newSize - 1);
+	m_userListeners.forEach(l ->
+	{
+	    l.contentsChanged(e);
+	});
+    }
+    /**
+     * notifie les écouteurs abonnés qu'un changement a eu lieu sur la liste des bases de données
+     */
+    private void fireDatabaseListChange()
+    {
+	int newSize = getDatabaseCount();
+	ListDataEvent e = new ListDataEvent(this, ListDataEvent.CONTENTS_CHANGED, 0, newSize - 1);
+	m_databaseListeners.forEach(l ->
+	{
+	    l.contentsChanged(e);
+	});
+    }
+
+    /**
+     * retourne le modèle de données pour le comnbobox d'utilisateurs
+     * @return le modèle de données pour le comnbobox d'utilisateurs
      */
     public ComboBoxUserModel getUserModel()
     {
@@ -53,27 +237,26 @@ public class ConnectionModel
     }
 
     /**
-     * Classe du modèle de données pour le combobox de selection de base de données
+     * retourne le modèle de données pour le combobox de bases de données
+     * @return le modèle de données pour le combobox de bases de données
+     */
+    public ComboBoxDatabaseModel getDatabaseModel()
+    {
+	return m_databaseModel;
+    }
+
+    /**
+     * Classe du modèle de données pour le combobox de selection de base de
+     * données
      */
     public class ComboBoxDatabaseModel implements ComboBoxModel<Database>
     {
 	/**
-	 * base de donnée actuellement selectionnée
-	 */
-	private Database m_selectedDatabase;
-	/**
-	 * ensemble d'écouteurs abonnés en cas de changement dans le modèle
-	 */
-	private final HashSet<ListDataListener> m_listeners;
-
-	/**
-	 * constructeur qui initialise l'ensemble des écouteurs et la base de données selectionnée par défaut
+	 * constructeur qui initialise l'ensemble des écouteurs et la base de
+	 * données selectionnée par défaut
 	 */
 	private ComboBoxDatabaseModel()
 	{
-	    m_listeners = new HashSet<>();
-	    m_selectedDatabase = new Database("", "");
-	    setSelectedItem(ConnectionHistory.getInstance().getLastDatabase());
 	}
 
 	@Override
@@ -81,18 +264,14 @@ public class ConnectionModel
 	{
 	    if (anItem instanceof Database)
 	    {
-		int oldSize = getUserModel().getSize();
-		Database db = (Database)anItem;
-		m_selectedDatabase.setName(db.getName());
-		m_selectedDatabase.setUrl(db.getUrl());
-		getUserModel().fireUserListChange(oldSize);
+		setSelectedDatabase((Database) anItem);
 	    }
 	}
 
 	@Override
 	public Object getSelectedItem()
 	{
-	    return m_selectedDatabase;
+	    return m_selectedDatabase.clone();
 	}
 
 	@Override
@@ -110,19 +289,13 @@ public class ConnectionModel
 	@Override
 	public void addListDataListener(ListDataListener l)
 	{
-	    if (l != null)
-	    {
-		m_listeners.add(l);
-	    }
+	    addDatabaseListDataListener(l);
 	}
 
 	@Override
 	public void removeListDataListener(ListDataListener l)
 	{
-	    if (l != null)
-	    {
-		m_listeners.remove(l);
-	    }
+	    removeDatabaseListDataListener(l);
 	}
     }
 
@@ -133,21 +306,11 @@ public class ConnectionModel
     {
 
 	/**
-	 * nom d'utilisateur actuellement selectionné
-	 */
-	private String m_selectedUser;
-	/**
-	 * ensemble d'écouteurs en cas de changement dans le modèle
-	 */
-	private HashSet<ListDataListener> m_listeners;
-
-	/**
-	 * constructeur qui initialise l'ensemble des écouteurs et l'utilisateur selectionné avec une valeur par défaut
+	 * constructeur qui initialise l'ensemble des écouteurs et l'utilisateur
+	 * selectionné avec une valeur par défaut
 	 */
 	private ComboBoxUserModel()
 	{
-	    m_listeners = new HashSet<>();
-	    m_selectedUser = ConnectionHistory.getInstance().getLastUser();
 	}
 
 	@Override
@@ -155,84 +318,59 @@ public class ConnectionModel
 	{
 	    if (anItem instanceof String)
 	    {
-		m_selectedUser = (String) anItem;
+		setSelectedUser((String) anItem);
 	    }
 	}
 
 	@Override
 	public Object getSelectedItem()
 	{
-	    return m_selectedUser;
+	    return getSelectedUser();
 	}
 
 	@Override
 	public int getSize()
 	{
-	    int size;
-	    Set<String> users = ConnectionHistory.getInstance().getUsers((Database) getDatabaseModel().getSelectedItem());
-	    if (users != null)
-	    {
-		size = users.size();
-	    } else
-	    {
-		size = 0;
-	    }
-	    return size;
+	    return getUserCount();
 	}
 
 	@Override
 	public String getElementAt(int index)
 	{
-	    String user;
-	    Set<String> users = ConnectionHistory.getInstance().getUsers((Database) getDatabaseModel().getSelectedItem());
-	    if (users != null)
-	    {
-		user = (String) users.toArray()[index];
-	    } else
-	    {
-		user = null;
-	    }
-	    return user;
+	    String[] users = getUsers();
+
+	    return users[index];
 	}
 
 	@Override
 	public void addListDataListener(ListDataListener l)
 	{
-	    if (l != null)
-	    {
-		m_listeners.add(l);
-	    }
+	    addUserListDataListener(l);
 	}
 
 	@Override
 	public void removeListDataListener(ListDataListener l)
 	{
-	    if (l != null)
-	    {
-		m_listeners.remove(l);
-	    }
+	    removeUserListDataListener(l);
+	}
+    }
+
+    /**
+     * classe d'écouteur qui est notifiée qu'un changement sur l'historique de connexion a eu lieu
+     */
+    private class ConnectionModelHistoryListener implements ChangeListener
+    {
+
+	public ConnectionModelHistoryListener()
+	{
+	    ConnectionHistory.addChangeListener(this);
 	}
 
-	/**
-	 * notifie les écouteurs que la liste des utilisateurs a été modifiée
-	 * @param oldSize l'ancienne taille de la liste
-	 */
-	private void fireUserListChange(int oldSize)
+	@Override
+	public void stateChanged(ChangeEvent e)
 	{
-	    int newSize = getSize();
-	    if (oldSize < newSize)
-	    {
-		ListDataEvent e = new ListDataEvent(this, ListDataEvent.INTERVAL_ADDED, oldSize, newSize - 1);
-		m_listeners.forEach(l -> l.intervalAdded(e));
-
-	    } else if (oldSize > newSize)
-	    {
-		ListDataEvent e = new ListDataEvent(this, ListDataEvent.INTERVAL_REMOVED, oldSize - 1, newSize);
-		m_listeners.forEach(l -> l.intervalRemoved(e));
-	    }
-	    int min = Math.min(oldSize, newSize);
-	    ListDataEvent e = new ListDataEvent(this, ListDataEvent.CONTENTS_CHANGED, min, min);
-	    m_listeners.forEach(l -> l.contentsChanged(e));
+	    fireDatabaseListChange();
+	    fireUserListChange();
 	}
 
     }
