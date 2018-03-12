@@ -21,7 +21,7 @@ public class LotAControlerModel extends AbstractListModel<Lot>
     
     public LotAControlerModel()
     {
-        listLot = ManagerLot.getLotAttControlList();
+        listLot = ManagerLot.getLotAControlerList();
     }
     
     @Override
@@ -36,7 +36,7 @@ public class LotAControlerModel extends AbstractListModel<Lot>
         return listLot.get(index);
     }
     
-      public void removeLot(Lot l) 
+    public void removeLot(Lot l) 
     {
         if(l != null)
         {
