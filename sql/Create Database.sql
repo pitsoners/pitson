@@ -2132,6 +2132,7 @@ GRANT EXECUTE ON sp_terminerProd TO ResponsablePresse;
 
 GRANT SELECT ON Modele TO Magasinier;
 GRANT SELECT ON Lot TO Magasinier;
+GRANT SELECT ON LotsAControler TO Controleur;
 GRANT SELECT ON LotsEnCoursProduction TO ResponsableAtelier;
 GRANT SELECT ON LotsAttenteProduction TO ResponsableAtelier;
 GRANT SELECT ON Stock TO ResponsableAtelier;
