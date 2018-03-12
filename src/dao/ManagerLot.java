@@ -295,12 +295,12 @@ public class ManagerLot
         return lot;
     }
     
-    /**
+     /**
      * Méthode permettant le demarrage du controle d'un lot
      * @param lotControle
      * @return 
      */
-    public static boolean demarrerControle(Lot lotControle)
+    public static boolean demarrerControleLot(Lot lotControle)
     {
         boolean ok = false;
         try
