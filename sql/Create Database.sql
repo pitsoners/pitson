@@ -2143,3 +2143,4 @@ GRANT SELECT ON Machine TO ResponsableApplication;
 GRANT SELECT ON Stock TO ResponsableApplication;
 GRANT SELECT ON Lot TO ResponsableApplication;
 GRANT SELECT ON Categorie TO ResponsableApplication;
+GRANT SELECT ON Stock TO Magasinier;
