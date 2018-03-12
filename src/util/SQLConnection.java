@@ -1,9 +1,16 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package util;
 
 import com.microsoft.sqlserver.jdbc.SQLServerDataSource;
 import com.microsoft.sqlserver.jdbc.SQLServerException;
+import java.util.logging.Logger;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.logging.Level;
 
 /**
  * Classe de connexion à la base de donnée
@@ -28,6 +35,7 @@ public final class SQLConnection
      * instance unique de la connexion
      */
     private static Connection s_connection;
+   
 
     /**
      * Modifie les paramètres de la connexion (et ferme la connexion en cours si elle est ouverte)
@@ -56,6 +64,24 @@ public final class SQLConnection
 	DATA_SOURCE.setUser(user);
 	DATA_SOURCE.setPassword(password);
     }
+    
+    /**
+     * retourne le nom de l'utilisateur actuellement connecté
+     * @return le nom de l'utilisateur actuellement connecté, ou {@code null} si la connexion est invalide
+     */
+    public static String getUser()
+    {
+	return getConnection() == null ? null : DATA_SOURCE.getUser();
+    }
+    
+    /**
+     * retourne la base de données actuellement paramétrée, si la connexion est valide
+     * @return la base de données connectée, ou {@code null} si la connexion est invalide
+     */
+    public static Database getDatabase()
+    {
+	return getConnection() == null ? null : new Database(DATA_SOURCE.getURL(), DATA_SOURCE.getDatabaseName());
+    }
 
     /**
      * retourne l'instance de la connexion à la base de donnée avec les paramètres courants.
@@ -77,6 +103,7 @@ public final class SQLConnection
 	    }
 	} catch (SQLException e)
 	{
+	    Logger.getLogger(SQLConnection.class.getName()).log(Level.SEVERE, null, e);
 	    s_connection = null;
 	}
 	return s_connection;
@@ -86,8 +113,40 @@ public final class SQLConnection
      * crée l'instance de connection avec les paramètres de connexion actuelle.
      * @throws SQLServerException  si une erreur de connexion survient.
      */
-    private static void createConnection() throws SQLServerException
+    private static void createConnection()
     {
-	s_connection = DATA_SOURCE.getConnection();
+	try
+	{
+	    s_connection = DATA_SOURCE.getConnection();
+	}
+	catch (SQLServerException e)
+	{
+	    s_connection = null;
+	}
+    }
+    
+    /**
+     * retourne une connection à la base de données 'master' sur le serveur indiqué. Cette connection n'est pas une instance unique et doit être fermée lorsqu'elle n'est plus utilisée.
+     * @param url l'url du serveur de base de données
+     * @param user le nom d'utilisateur pour la connexion
+     * @param password le mot de passede l'utilisateur
+     * @return la connexion à la base de données, ou {@code null} si elle a échoué
+     */
+    public static Connection getMasterConnection(String url, String user, String password)
+    {
+	SQLServerDataSource dataSource = new SQLServerDataSource();
+	dataSource.setURL(url);
+	dataSource.setUser(user);
+	dataSource.setDatabaseName("master");
+	dataSource.setPassword(password);
+	Connection conn = null;
+	try
+	{
+	    conn = dataSource.getConnection();
+	} catch (SQLServerException ex)
+	{
+	    Logger.getLogger(SQLConnection.class.getName()).log(Level.SEVERE, null, ex);
+	}
+	return conn;
     }
 }
