@@ -34,7 +34,7 @@ BEGIN TRY
 		-- Par défaut lors de la création de la machine, le BIT En service vaut 1
 			INSERT INTO Machine (libellePresse, enService) VALUES (@libellePresse, 1);
 			SET @codeRetour = 0 ;
-			SET @messageRetour = 'Machine ajouté dans la table avec succès.';
+			SET @messageRetour = 'Machine "' + @libellePresse + '" ajoutée dans la table avec succès.';
 			SET @iDcree = (SELECT idPresse FROM MACHINE WHERE libellePresse = @libellePresse) ;
 		END
 	END
@@ -85,7 +85,7 @@ BEGIN TRY
 			DELETE FROM Machine
 			WHERE idPresse = @idPresse ;
 			SET @codeRetour = 0 ;
-			SET @messageRetour = 'Machine supprimée de la table avec succès.';
+			SET @messageRetour = 'Machine "' + @idPresse + '" supprimée de la table avec succès.';
 		END
 	END
 END TRY
@@ -141,7 +141,7 @@ BEGIN TRY
 			SET libellePresse = @nouveauNom
 			WHERE idPresse = @idPresseARenommer ;
 			SET @codeRetour = 0 ;
-			SET @messageRetour = 'Presse renommée avec succès.';
+			SET @messageRetour = 'Presse ' + @idPresseARenommer + ' renommée "' + @nouveauNom + '" avec succès.';
 		END
 	END
 END TRY
@@ -198,7 +198,7 @@ BEGIN TRY
 			SET enService = @enService
 			WHERE idPresse = @idPresse ;
 			SET @codeRetour = 0 ;
-			SET @messageRetour = 'Statut mis à jour avec succès.';
+			SET @messageRetour = 'Statut de la presse ' + @idPresse + ' mis à jour avec succès.';
 		END
 	END
 END TRY
