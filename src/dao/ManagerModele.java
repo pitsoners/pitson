@@ -5,12 +5,18 @@
  */
 package dao;
 
+
 import entity.Modele;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import util.ReturnDataBase;
 import util.SQLConnection;
 
 /**
@@ -24,9 +30,9 @@ public class ManagerModele {
      * @param mo
      * @return 
      */
-    public static boolean creerModele(Modele mo)
+    public static ReturnDataBase creerModele(Modele mo)
     {
-        boolean ok = false ;
+        ReturnDataBase rdb = null ;
         try
         {
             Connection co = SQLConnection.getConnection() ;
@@ -36,20 +42,17 @@ public class ManagerModele {
             cs.setString(2, mo.getIdModele());
             cs.setDouble(3, mo.getDiametre());
             cs.executeUpdate();
-            if (cs.getByte(1) != 0)
+            rdb = new ReturnDataBase(cs.getByte(1), cs.getString(4));
+            if (rdb.getCode()!= 0)
             {
-                System.out.println("Erreur lors de la création du modèle : " + cs.getByte(1) + "\nMessage d'erreur : " + cs.getString(4));
-            }
-            else
-            {
-                ok = true ;
+                System.out.println(rdb);
             }
         }
         catch (Exception e)
         {
             System.out.println(e) ;
         }
-        return ok ;
+        return rdb ;
     }
     
     /**
@@ -63,14 +66,14 @@ public class ManagerModele {
         try
         {            
             Connection co = SQLConnection.getConnection() ;
-            PreparedStatement pst = co.prepareStatement("SELECT *, (SELECT COUNT(idLot) FROM Lot l WHERE l.idModele = Modele.idModele), (SELECT COUNT(idModele) FROM Stock s WHERE s.idModele = Modele.idModele) FROM Modele WHERE idModele = '" + idModele + "'") ;
+            PreparedStatement pst = co.prepareStatement("SELECT *, (SELECT COUNT(idLot) FROM Lot l WHERE l.idModele = Modele.idModele), (SELECT SUM(qtStock) FROM Stock s WHERE s.idModele = Modele.idModele) FROM Modele WHERE idModele = '" + idModele + "'") ;
             boolean test = pst.execute();
             if (test)
             {
                 ResultSet rs = pst.getResultSet() ;
                 while (rs.next())
                 {
-                    retour = new Modele(rs.getString(1), rs.getDouble(2), rs.getBoolean(3), (rs.getInt(4)==0 && rs.getInt(5)==0)) ;
+                    retour = new Modele(rs.getString(1), rs.getDouble(2), rs.getBoolean(3), (rs.getInt(4) == 0 && rs.getInt(5) == 0)) ;
                 }
             }
             else
@@ -95,14 +98,14 @@ public class ManagerModele {
         try
         {            
             Connection co = SQLConnection.getConnection() ;
-            PreparedStatement pst = co.prepareStatement("SELECT *, (SELECT COUNT(idLot) FROM Lot l WHERE l.idModele = Modele.idModele), (SELECT COUNT(idModele) FROM Stock s WHERE s.idModele = Modele.idModele) FROM Modele ORDER BY idModele") ;
+            PreparedStatement pst = co.prepareStatement("SELECT *, (SELECT COUNT(idLot) FROM Lot l WHERE l.idModele = Modele.idModele), (SELECT SUM(qtStock) FROM Stock s WHERE s.idModele = Modele.idModele) FROM Modele ORDER BY idModele") ;
             boolean test = pst.execute();
             if (test)
             {
                 ResultSet rs = pst.getResultSet() ;
                 while (rs.next())
                 {
-                    liste.add(new Modele(rs.getString(1), rs.getDouble(2), rs.getBoolean(3), (rs.getInt(4)==0 && rs.getInt(5)==0))) ;
+                    liste.add(new Modele(rs.getString(1), rs.getDouble(2), rs.getBoolean(3), (rs.getInt(4) == 0 && rs.getInt(5) == 0))) ;
                 }
             }
             else
@@ -123,9 +126,9 @@ public class ManagerModele {
      * @param newId est le nouveau nom à affecter au modèle
      * @return 
      */
-    public static boolean renommerModele(Modele aRenommer, String newId)
+    public static ReturnDataBase renommerModele(Modele aRenommer, String newId)
     {
-        boolean ok = false ;
+        ReturnDataBase rdb = null ;
         try
         {
             Connection co = SQLConnection.getConnection() ;
@@ -135,13 +138,13 @@ public class ManagerModele {
             cs.setString(2, aRenommer.getIdModele());
             cs.setString(3, newId);
             cs.executeUpdate();
-            if (cs.getByte(1) != 0)
+            rdb = new ReturnDataBase(cs.getByte(1), cs.getString(4));
+            if (rdb.getCode()!= 0)
             {
-                System.out.println("Erreur lors de du renommage : " + cs.getByte(1) + "\nMessage d'erreur : " + cs.getString(4));
+                System.out.println(rdb);
             }
             else
             {
-                ok = true ;
                 aRenommer.setIdModele(newId);
             }
         }
@@ -149,7 +152,7 @@ public class ManagerModele {
         {
             System.out.println(e) ;
         }
-        return ok ;
+        return rdb ;
     }
     
     /**
@@ -158,9 +161,9 @@ public class ManagerModele {
      * @param obsolete est le nouveau statut à affecter au modèle
      * @return 
      */
-    public static boolean updateObsoleteModele(Modele mo, boolean obsolete)
+    public static ReturnDataBase updateObsoleteModele(Modele mo, boolean obsolete)
     {
-        boolean ok = false ;
+        ReturnDataBase rdb = null ;
         try
         {
             Connection co = SQLConnection.getConnection() ;
@@ -170,13 +173,13 @@ public class ManagerModele {
             cs.setString(2, mo.getIdModele());
             cs.setInt(3, (obsolete ? 1 : 0));
             cs.executeUpdate();
-            if (cs.getByte(1) != 0)
+            rdb = new ReturnDataBase(cs.getByte(1), cs.getString(4));
+            if (rdb.getCode()!= 0)
             {
-                System.out.println("Erreur lors de la mise à jour du statut : " + cs.getByte(1) + "\nMessage d'erreur : " + cs.getString(4));
+                System.out.println(rdb);
             }
             else
             {
-                ok = true ;
                 mo.setObsolete(obsolete);
             }
         }
@@ -184,7 +187,7 @@ public class ManagerModele {
         {
             System.out.println(e) ;
         }
-        return ok ;
+        return rdb ;
     }
     
     /**
@@ -192,9 +195,9 @@ public class ManagerModele {
      * @param aSupprimer est le modèle à supprimer
      * @return 
      */
-    public static boolean supprimerModele(Modele aSupprimer)
+    public static ReturnDataBase supprimerModele(Modele aSupprimer)
     {
-        boolean ok = false ;
+        ReturnDataBase rdb = null ;
         try
         {
             Connection co = SQLConnection.getConnection() ;
@@ -203,20 +206,17 @@ public class ManagerModele {
             cs.registerOutParameter(3, java.sql.Types.VARCHAR);
             cs.setString(2, aSupprimer.getIdModele());
             cs.executeUpdate();
-            if (cs.getByte(1) != 0)
+            rdb = new ReturnDataBase(cs.getByte(1), cs.getString(3));
+            if (rdb.getCode()!= 0)
             {
-                System.out.println("Erreur lors de la suppression : " + cs.getByte(1) + "\nMessage d'erreur : " + cs.getString(4));
-            }
-            else
-            {
-                ok = true ;
+                System.out.println(rdb);
             }
         }
         catch (Exception e)
         {
             System.out.println(e) ;
         }
-        return ok ;
+        return rdb ;
     }
     
         /**
@@ -250,39 +250,5 @@ public class ManagerModele {
             Logger.getLogger(ManagerStock.class.getName()).log(Level.SEVERE, null, ex);
         }
         return listeIdModele;
-    }
-    
-     private static final String SELECT_SUM_PROD_MODELE = "SELECT SUM(nbrPieceDemande) FROM Lot WHERE idModele = ? AND etatProduction <> 'Termine'";
-
-    /**
-     * Cette méthode permet de récupérer la somme des quantité de pièces en
-     * production pour un Model donné
-     *
-     * @param id est l'id du modèle dont on veut le total de pièce
-     * @return retourne le total de pièces en production
-     */
-    public static int getQuantiteEnProd(String id)
-    {
-        int total = 0;
-        Connection connection;
-        try
-        {
-            connection = SQLConnection.getConnection();
-            CallableStatement cs = connection.prepareCall(SELECT_SUM_PROD_MODELE);
-            cs.setString(1, id);
-            if (cs.execute())
-            {
-                ResultSet rs = cs.executeQuery();
-                while (rs.next())
-                {
-                    total = total + rs.getInt(1);
-                }
-            }
-        }
-        catch (SQLException ex)
-        {
-            Logger.getLogger(ManagerStock.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return total;
     }
 }
