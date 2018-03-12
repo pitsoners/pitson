@@ -329,4 +329,38 @@ public class ManagerLot
         return ok;
         
     }
+    
+        /**
+     * Méthode permettant de terminer le controle d'un lot
+     * @param lotFinControle
+     * @return 
+     */
+    public static boolean terminerControleLot(Lot lotFinControle)
+    {
+        boolean ok = false;
+        try
+        {
+            Connection co = SQLConnection.getConnection();
+            CallableStatement cs = co.prepareCall("{? = call sp_terminerControle(?,?)}");
+            cs.registerOutParameter(1, java.sql.Types.INTEGER);
+            cs.registerOutParameter(3, java.sql.Types.VARCHAR);
+            cs.setInt(2, lotFinControle.getIdLot());
+            cs.executeUpdate();
+            if(cs.getByte(1) != 0)
+            {
+                System.out.println("Erreur lors du demarrage du controle :" + cs.getByte(1) + "\nMessage d'erreur : " + cs.getString(3));
+            }
+            else
+            {
+                lotFinControle.setEtatControle("Termine");
+                ok = true;
+            }
+        }
+        catch(Exception e)
+        {
+            System.out.println(e);
+        }
+        
+        return ok;
+    }
 }
