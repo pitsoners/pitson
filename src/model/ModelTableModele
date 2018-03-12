@@ -1,0 +1,405 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package model;
+
+import dao.ManagerModele;
+import entity.Modele;
+import java.util.ArrayList;
+import javax.swing.table.AbstractTableModel;
+import render.ButtonInTable;
+import util.StatutObjetTable;
+
+/**
+ *
+ * @author denis
+ */
+public class ModelTableModele extends AbstractTableModel{
+    private static ArrayList<ElementTable> listeModele ;          // Liste de modèles extraite de la BDD, qui contient un original, une copie et un statut
+    private static ArrayList<String> nomsColonnes ;         // Nom des colonnes de la Jtable
+    private static Modele modeleVide = new Modele("Nouveau modèle...",0,false, false) ;
+    
+    public ModelTableModele ()
+    {
+        initNomsColonnes() ;
+        updateListeModele() ;
+    }
+    
+    /**
+     * Methode permettant de vérifier si un nom de modèle est libre en parcourant la liste de modèles
+     * @param nom est le nom à vérifier
+     * @return 
+     */
+    public boolean nomEstLibre(String nom)
+    {
+        boolean libre = true ;
+        for (ElementTable et : listeModele)
+        {
+            if (nom.equals(et.getEnCours().getIdModele())) libre = false ;
+        }
+        return libre ;
+    }
+    
+    /**
+     * Methode permettant de vérifier si un diamètre nominal de modèle est libre en parcourant la liste de modèles
+     * @param diametre est le diamètre à vérifier
+     * @return 
+     */
+    public boolean diametreEstLibre(String diametre)
+    {
+        boolean libre = true ;
+        for (ElementTable et : listeModele)
+        {
+            if (Double.parseDouble(diametre) == et.getEnCours().getDiametre()) libre = false ;
+        }
+        return libre ;
+    }
+    
+    /**
+     * Méthode qui permet d'insérer le nouveau modèle dans la liste de modèles
+     */
+    public void newModele()
+    {
+        // On crée un nouveau modèle à partir du modèle vide
+        Modele nouveau = new Modele(modeleVide.getIdModele(), modeleVide.getDiametre(), modeleVide.isObsolete(), true);
+        
+        // On réinitialise les valeurs du modèle vide et on envoie le fire sur la première ligne
+        modeleVide.setIdModele("Nouveau modèle...");
+        modeleVide.setDiametre(0);
+        modeleVide.setObsolete(false);
+        fireTableRowsUpdated(0, 0);
+        
+        // Insertion du nouveau modèle dans la liste
+        int parcours = 0 ;
+        Modele m = listeModele.get(parcours).getEnCours();
+        // On parcourt la liste jusqu'à trouver ou insérer le modèle alphabétiquement
+        while (parcours < listeModele.size() && nouveau.getIdModele().compareToIgnoreCase(m.getIdModele()) > 0)
+        {
+            parcours ++ ;
+        }
+        // On insère la nouvelle ligne dans la liste
+        listeModele.add(parcours, new ElementTable(nouveau, StatutObjetTable.INSERTED));
+        fireTableRowsInserted(parcours + 1, parcours + 1);  // Ne pas oublier que la table comporte une ligne de plus au début, d'où le + 1
+    }
+    
+    /**
+     * Méthode permettant de faire un back up sur un modèle qu'on a modifié
+     * @param rowIndex est la ligne de la jtable dans laquelle se trouve le modèle
+     */
+    public void backUpModele(int rowIndex)
+    {
+        if (rowIndex >= 1)
+        {
+            // On re met les valeurs de l'original dans le modèle en cours
+            listeModele.get(rowIndex - 1).getEnCours().recopieModele(listeModele.get(rowIndex - 1).getOriginal());
+            updateStatutModele(rowIndex, StatutObjetTable.NONE);
+            // On indique que le modèle à changé
+            fireTableRowsUpdated(rowIndex, rowIndex);
+        }
+    }
+    
+    /**
+     * Méthode qui permet de supprimer un modèle : s'il est issu de la base de données il sera marqué comme supprimé, s'il a été créé par l'application la suppression sera effective immédiatement
+     * @param rowIndex est l'index du modèle à supprimer dans la table
+     */
+    public void deleteModele(int rowIndex)
+    {
+        if(listeModele.get(rowIndex - 1).getStatut() == StatutObjetTable.NONE)
+        {
+            // On indique que le statut du modèle est passé à deleted en vue de mettre la base de données à jour à la fin
+            listeModele.get(rowIndex - 1).setStatut(StatutObjetTable.DELETED);
+            fireTableRowsUpdated(rowIndex, rowIndex);
+        }
+        else if (listeModele.get(rowIndex - 1).getStatut() == StatutObjetTable.INSERTED)
+        {
+            // On supprime le modèle
+            listeModele.remove(rowIndex - 1);
+            fireTableRowsDeleted(rowIndex, rowIndex);
+        }
+    }
+    
+    /**
+     * Méthode qui renvoie le statut d'un modèle stocké dans la table
+     * @param rowIndex est l'index du modèle dans la table
+     * @return 
+     */
+    public StatutObjetTable getStatutModele(int rowIndex)
+    {
+        StatutObjetTable statut = null ;
+        if (rowIndex >= 1) statut =  listeModele.get(rowIndex - 1).getStatut() ;
+        return statut ;
+    }
+    
+    /**
+     * Méthode permettant de changer le statut d'un modèle
+     * @param rowIndex est l'index du modele dans la table
+     * @param statut est le nouveau statut à affecter
+     */
+    public void updateStatutModele(int rowIndex, StatutObjetTable statut)
+    {
+        if (statut != null)
+        {
+            listeModele.get(rowIndex - 1).setStatut(statut);
+            // On indique que le statut a été modifié, donc que la dernière colonne doit être mise à jour
+            fireTableCellUpdated(rowIndex, 3);
+        }
+    }
+
+    @Override
+    public int getRowCount() {
+        return listeModele.size() + 1 ;
+    }
+
+    @Override
+    public int getColumnCount() {
+        return nomsColonnes.size() ;
+    }
+
+    @Override
+    public Object getValueAt(int rowIndex, int columnIndex) {
+        Object retour = null;
+        Modele mo ;
+        if (rowIndex == 0)
+        // la première ligne est réservée au modèle vide
+        {
+            switch(columnIndex)
+            {
+                case 0 :
+                    retour = modeleVide.getIdModele() ;
+                    break ;
+                case 1 :
+                    retour = "" + modeleVide.getDiametre() ;
+                    break ;
+                case 2 :
+                    retour = modeleVide.isObsolete() ;
+                    break ;
+                case 3 :
+                    // Pour la première ligne on retourne toujours le code qui correspond au bouton ADD dans la classe ButtonInTable
+                    retour = ButtonInTable.ADD_MODE ;
+                    break ;
+                default : // impossible de se retrouver la...
+            }
+        }
+        else
+        // toutes les autres lignes affichent les modèles (attention index - 1 dans la liste de modèles !)
+        {
+            mo = listeModele.get(rowIndex - 1).getEnCours();
+            switch(columnIndex)
+            {
+                case 0 :
+                    // On retourne le nom du modèle
+                    retour = mo.getIdModele() ;
+                    break ;
+                case 1 :
+                    // On retourne le diamètre du modèle
+                    retour = "" + mo.getDiametre() ;
+                    break ;
+                case 2 :
+                    // On retourne le statut du modèle
+                    retour = mo.isObsolete() ;
+                    break ;
+                case 3 :
+                    // On va retourner 0, 2 ou 3 qui correspondent aux boutons vide, supprimer ou undo dans la classe ButtonInTable
+                    StatutObjetTable statut = listeModele.get(rowIndex - 1).getStatut() ;
+                    if (statut == StatutObjetTable.NONE)
+                    {
+                        if (mo.isSupprimable()) retour = ButtonInTable.DELETE_MODE ;
+                        else retour = ButtonInTable.NONE_MODE ;
+                    }
+                    else if (statut == StatutObjetTable.INSERTED)
+                    {
+                        retour = ButtonInTable.DELETE_MODE ;
+                    }
+                    else
+                    {
+                        retour = ButtonInTable.UNDO_MODE ;
+                    }
+                    break ;
+                default : // impossible de se retrouver la...
+            }
+        }
+        return retour ;
+    }
+
+    @Override
+    public String getColumnName(int column) {
+        return nomsColonnes.get(column);
+    }
+    
+    /**
+     * Méthode qui permet de mettre à jour la liste du modèle en allant récupérer cette liste dans la base de données
+     */
+    public void updateListeModele()
+    {
+        listeModele = new ArrayList<>();
+        for (Modele m : ManagerModele.getModeleList())
+        {
+            listeModele.add(new ElementTable(m, StatutObjetTable.NONE));
+        }
+        fireTableDataChanged();
+        
+    }
+    
+    private static void initNomsColonnes()
+    {
+        nomsColonnes = new ArrayList<>() ;
+        nomsColonnes.add("Libellé");
+        nomsColonnes.add("Diamètre");
+        nomsColonnes.add("Obsolète");
+        nomsColonnes.add("Action");
+    }
+
+    @Override
+    public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+        // Si on modifie la première ligne (pour créer un nouveau modèle)
+        if (rowIndex == 0)
+        {
+            // Si on modifie le nom
+            if (columnIndex == 0)
+            {
+                modeleVide.setIdModele((String)aValue);
+            }
+            // Si on modifie le diamètre
+            else if (columnIndex == 1)
+            {
+                modeleVide.setDiametre(Double.parseDouble((String)aValue));
+            }
+            // Si on modifie le statut d'obsolescence
+            else if (aValue instanceof Boolean && columnIndex == 2)
+            {
+                modeleVide.setObsolete((Boolean) aValue);
+            }
+            fireTableCellUpdated(rowIndex, columnIndex);
+        }
+        
+        // Si on modifie un modèle existant (attention rowIndex - 1 = index dans la liste de modèles !)
+        else
+        {
+            Modele mo = listeModele.get(rowIndex - 1).getEnCours();
+            // Si on modifie le nom
+            if (columnIndex == 0)
+            {
+                // On change le nom du modèle dans l'application
+                mo.setIdModele((String)aValue);
+                // On enregistre le fait que ce modèle soit modifié s'il était au statut none
+                if (listeModele.get(rowIndex - 1).getStatut() == StatutObjetTable.NONE) updateStatutModele(rowIndex, StatutObjetTable.UPDATED);
+            }
+             // Si on modifie le statut d'obsolescence
+            else if (aValue instanceof Boolean && columnIndex == 2)
+            {
+                // On change le statut du modèle dans l'application
+                mo.setObsolete((Boolean) aValue);
+                // On enregistre le fait que ce modèle soit modifié s'il était au statut none
+                if (listeModele.get(rowIndex - 1).getStatut() == StatutObjetTable.NONE) updateStatutModele(rowIndex, StatutObjetTable.UPDATED);
+            }
+            fireTableRowsUpdated(rowIndex, rowIndex);
+        }
+    }
+
+    @Override
+    public boolean isCellEditable(int rowIndex, int columnIndex) {
+        // Les colonnes 0 (nom) et 2 (obsolete) sont éditables si le modèle est vierge ou modifié ou inséré
+        // La colonne 1 (diamètre) est éditable pour la première ligne car c'est celle qui sert à la création d'un nouveau modèle
+        boolean estEditable = false ;
+        if (rowIndex == 0)
+        {
+            estEditable = true ;
+        }
+        else if (!(listeModele.get(rowIndex - 1).getStatut() == StatutObjetTable.DELETED))
+        {
+            if (columnIndex == 0 || columnIndex == 2 || columnIndex == 3) estEditable = true ;
+        }
+        return estEditable ;
+    }
+
+    @Override
+    public Class<?> getColumnClass(int columnIndex) {
+        Class classe = String.class ;
+        switch(columnIndex)
+        {
+            case 2:
+                classe = Boolean.class ;
+                break;
+            case 3:
+                classe = Integer.class;
+                break;
+        }
+        return classe ;
+    }
+    
+    /**
+     * Methode qui permet de mettre à jour la base de données avec les données récupérées dans l'application
+     * @return 
+     */
+    public ArrayList<util.ReturnDataBase> updateDatabase()
+        {
+            ArrayList<util.ReturnDataBase> logs = new ArrayList<>() ;
+            for (ElementTable et : listeModele )
+            {
+                if (et.getStatut() == StatutObjetTable.DELETED)
+                {
+                    logs.add(ManagerModele.supprimerModele(et.getOriginal()));
+                }
+                else if (et.getStatut() == StatutObjetTable.INSERTED)
+                {
+                    logs.add(ManagerModele.creerModele(et.getEnCours()));
+                }
+                else if (et.getStatut() == StatutObjetTable.UPDATED)
+                {
+                    if (et.getEnCours().isObsolete() != et.getOriginal().isObsolete())
+                    {
+                        logs.add(ManagerModele.updateObsoleteModele(et.getEnCours(), et.getEnCours().isObsolete()));
+                    }
+                    if (!et.getEnCours().getIdModele().equals(et.getOriginal().getIdModele()))
+                    {
+                        logs.add(ManagerModele.renommerModele(et.getOriginal(), et.getEnCours().getIdModele()));
+                    }
+                }
+            }
+            updateListeModele();
+            return logs ;
+        }
+    
+    
+    private static class ElementTable
+    {
+        private Modele original;
+        private Modele enCours;
+        private StatutObjetTable statut;
+        
+        public ElementTable(Modele modele, StatutObjetTable sot)
+        {
+            original = modele ;
+            enCours = new Modele (modele.getIdModele(), modele.getDiametre(), modele.isObsolete(), modele.isSupprimable());
+            statut = sot ;
+        }
+
+        public Modele getOriginal() {
+            return original;
+        }
+
+        public void setOriginal(Modele original) {
+            this.original = original;
+        }
+
+        public Modele getEnCours() {
+            return enCours;
+        }
+
+        public void setEnCours(Modele enCours) {
+            this.enCours = enCours;
+        }
+
+        public StatutObjetTable getStatut() {
+            return statut;
+        }
+
+        public void setStatut(StatutObjetTable statut) {
+            this.statut = statut;
+        }
+        
+        
+    }
+}
