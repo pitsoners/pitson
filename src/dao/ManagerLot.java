@@ -161,7 +161,7 @@ public class ManagerLot
      * Méthode permettant de récupérer la liste de tous les lots en attente de controle existants dans la base de données
      * @return 
      */
-     public static ArrayList<Lot> getLotAttControlList()
+     public static ArrayList<Lot> getLotAControlerList()
     {
         ArrayList<Lot> liste = new ArrayList();
         try
@@ -262,8 +262,8 @@ public class ManagerLot
         
         return ok;
     }
-
-        /**
+    
+     /**
      * Cette méthode permet de récupérer les information d'un lot à partir d'un
      * ID
      *
@@ -295,7 +295,7 @@ public class ManagerLot
         return lot;
     }
     
-     /**
+    /**
      * Méthode permettant le demarrage du controle d'un lot
      * @param lotControle
      * @return 
@@ -330,7 +330,7 @@ public class ManagerLot
         
     }
     
-        /**
+    /**
      * Méthode permettant de terminer le controle d'un lot
      * @param lotFinControle
      * @return 
@@ -363,4 +363,5 @@ public class ManagerLot
         
         return ok;
     }
+
 }
