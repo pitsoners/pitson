@@ -272,14 +272,14 @@ public class ModelTableMachine extends AbstractTableModel{
                 // On change le libelle de la presse dans l'application
                 ma.setLibellePresse((String)aValue);
                 // On enregistre le fait que la machine à été modifiée si elle était au statut none
-                if (listeMachine.get(rowIndex - 1).getStatut() == StatutObjetTable.NONE) updateStatutMachine(rowIndex - 1, StatutObjetTable.UPDATED);
+                if (listeMachine.get(rowIndex - 1).getStatut() == StatutObjetTable.NONE) updateStatutMachine(rowIndex, StatutObjetTable.UPDATED);
             }
             else if (columnIndex == 2 && aValue instanceof Boolean)
             {
                 // On change le statut de la machine dans l'application
                 ma.setEnService((Boolean)aValue);
                 // On enregistre le fait que la machine à été modifiée si elle était au statut none
-                if (listeMachine.get(rowIndex - 1).getStatut() == StatutObjetTable.NONE) updateStatutMachine(rowIndex - 1, StatutObjetTable.UPDATED);
+                if (listeMachine.get(rowIndex - 1).getStatut() == StatutObjetTable.NONE) updateStatutMachine(rowIndex, StatutObjetTable.UPDATED);
             }
             fireTableRowsUpdated(rowIndex, rowIndex);
         }
