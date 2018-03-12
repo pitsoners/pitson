@@ -438,6 +438,12 @@ BEGIN
 			IF @defautVisuel IS NULL
 				SET @defautVisuel = 0;
 			BEGIN TRY
+				BEGIN TRANSACTION;
+				DECLARE @dummy int;
+				SELECT @dummy = l.idLot
+				FROM Lot l WITH (holdlock, tablockx),
+					Piece p WITH (holdlock, tablockx)
+				WHERE l.idLot IS NULL;
 				IF NOT EXISTS
 					(
 						SELECT idLot
@@ -447,6 +453,7 @@ BEGIN
 					BEGIN
 						SET @codeRetour = 2;
 						SET @messageRetour = 'Le lot ''' + convert(varchar(10), @idLot) + ''' n''existe pas.';
+						ROLLBACK TRANSACTION;
 					END
 				ELSE
 					BEGIN
@@ -456,11 +463,13 @@ BEGIN
 							BEGIN
 								SET @codeRetour = 2;
 								SET @messageRetour = 'Le contrôle du Lot ''' + convert(varchar(10), @idLot) + ''' doit être annoncé au préalable';
+								ROLLBACK TRANSACTION;
 							END
 						ELSE IF @etat = 'Termine'
 							BEGIN
 								SET @codeRetour = 2;
 								SET @messageRetour = 'Le contrôle du Lot ''' + convert(varchar(10), @idLot) + ''' a déjà été clôturé.';
+								ROLLBACK TRANSACTION;
 							END
 						ELSE
 							BEGIN
@@ -470,18 +479,26 @@ BEGIN
 								SELECT @nominal = m.diametre
 								FROM Modele m JOIN Lot l On m.idModele = l.idModele
 								WHERE l.idLot = @idLot;
-								EXECUTE dbo.sp_categoriePiece @nominal, @ht, @hl, @bt, @bl, @defautVisuel, @cat OUTPUT;
+								EXECUTE dbo.sp_categoriePiece @nominal, @ht, @hl, @bt , @bl, @defautVisuel, @cat OUTPUT;
 								INSERT INTO Piece (idLot, dimensionHT, dimensionHL, dimensionBT, dimensionBL, defautVisuel, commentaire, idCategorie)
 									OUTPUT INSERTED.idPiece INTO @tab VALUES (@idLot, @ht, @hl, @bt, @bl, @defautVisuel, @commentaire, @cat);
 								SELECT @idPiece = idPiece FROM @tab;
-								SET @codeRetour = 0;
-								SET @messageRetour = 'Pièce saisie avec succès.';
+								EXECUTE @codeRetour = sp_mettreAJourStatsLot @idLot, @messageRetour;
+								IF @codeRetour <> 0
+									ROLLBACK TRANSACTION;
+								ELSE
+									BEGIN
+										SET @codeRetour = 0;
+										SET @messageRetour = 'Pièce saisie avec succès.';
+										COMMIT TRANSACTION;
+									END
 							END
 					END
 			END TRY
 			BEGIN CATCH
 				SET @codeRetour = 3;
 				SET @messageRetour = 'Erreur base de donnée : ' + ERROR_MESSAGE();
+				ROLLBACK TRANSACTION;
 			END CATCH
 		END
 	RETURN @codeRetour;
