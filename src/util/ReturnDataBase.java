@@ -70,5 +70,10 @@ public class ReturnDataBase
     {
         this.message = message;
     }
+    
+    @Override
+    public String toString() {
+        return "Code retour : " + code + ", message : " + message;
+    }
 
 }
