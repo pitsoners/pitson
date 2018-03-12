@@ -93,12 +93,13 @@ BEGIN TRY
 		END
 		ELSE
 		BEGIN
+			-- Suppression du modèle dans la table stock
+			DELETE Stock
+			FROM Stock
+			WHERE idModele = @idModele ;
 			-- Suppression du modèle dans la table modèle
 			DELETE Modele
 			FROM Modele
-			WHERE idModele = @idModele ;
-			-- Suppression du modèle dans la table stock
-			DELETE FROM Stock
 			WHERE idModele = @idModele ;
 			SET @codeRetour = 0 ;
 			SET @messageRetour = 'Modèle supprimé de la table avec succès.';
