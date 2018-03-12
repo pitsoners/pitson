@@ -5,11 +5,7 @@
  */
 package view;
 
-import javax.swing.JDialog;
-import javax.swing.table.TableModel;
-import model.LotEnCoursModel;
 import render.RendererLotEnCours;
-import view.PopupLancerNouveauLot;
 
 /**
  *
@@ -40,10 +36,14 @@ public class FrameResponsableAtelier extends javax.swing.JFrame
         labelStock = new javax.swing.JLabel();
         jScrollPane2 = new javax.swing.JScrollPane();
         tableStock = new javax.swing.JTable();
-        buttonRetour = new javax.swing.JButton();
+        buttonAnnulerLot = new javax.swing.JButton();
         buttonLancerLot = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         listeLotEnCour = new javax.swing.JList();
+        buttonRetour1 = new javax.swing.JButton();
+        labelLotAttente = new javax.swing.JLabel();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        listeLotAttente = new javax.swing.JList();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Gestion Atelier");
@@ -57,7 +57,14 @@ public class FrameResponsableAtelier extends javax.swing.JFrame
         tableStock.setModel(new model.ModelTableStock());
         jScrollPane2.setViewportView(tableStock);
 
-        buttonRetour.setText("Retour");
+        buttonAnnulerLot.setText("Annuler Lot");
+        buttonAnnulerLot.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
+                buttonAnnulerLotActionPerformed(evt);
+            }
+        });
 
         buttonLancerLot.setText("Lancer Lot");
         buttonLancerLot.addActionListener(new java.awt.event.ActionListener()
@@ -72,27 +79,39 @@ public class FrameResponsableAtelier extends javax.swing.JFrame
         listeLotEnCour.setCellRenderer(new RendererLotEnCours());
         jScrollPane1.setViewportView(listeLotEnCour);
 
+        buttonRetour1.setText("Retour");
+
+        labelLotAttente.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        labelLotAttente.setText("Lots en attente :");
+
+        listeLotAttente.setModel(new model.LotEnAttenteModel());
+        jScrollPane3.setViewportView(listeLotAttente);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(0, 428, Short.MAX_VALUE)
-                        .addComponent(buttonRetour, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap(285, Short.MAX_VALUE)
+                        .addComponent(buttonRetour1, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(buttonAnnulerLot, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(12, 12, 12)
                         .addComponent(buttonLancerLot, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                         .addGap(35, 35, 35)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(labelLotsEnCours, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jScrollPane1))
+                            .addComponent(jScrollPane1)
+                            .addComponent(labelLotAttente, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jScrollPane3))
                         .addGap(40, 40, 40)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(labelStock, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 365, Short.MAX_VALUE))))
-                .addContainerGap(33, Short.MAX_VALUE))
+                .addContainerGap(34, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -103,12 +122,18 @@ public class FrameResponsableAtelier extends javax.swing.JFrame
                     .addComponent(labelLotsEnCours, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jScrollPane1)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 394, Short.MAX_VALUE))
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 394, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 149, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(labelLotAttente)
+                        .addGap(18, 18, 18)
+                        .addComponent(jScrollPane3)))
                 .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(buttonRetour, javax.swing.GroupLayout.DEFAULT_SIZE, 43, Short.MAX_VALUE)
-                    .addComponent(buttonLancerLot, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(buttonLancerLot, javax.swing.GroupLayout.DEFAULT_SIZE, 43, Short.MAX_VALUE)
+                    .addComponent(buttonAnnulerLot, javax.swing.GroupLayout.DEFAULT_SIZE, 43, Short.MAX_VALUE)
+                    .addComponent(buttonRetour1, javax.swing.GroupLayout.DEFAULT_SIZE, 43, Short.MAX_VALUE))
                 .addContainerGap())
         );
 
@@ -124,14 +149,26 @@ public class FrameResponsableAtelier extends javax.swing.JFrame
         }
     }//GEN-LAST:event_buttonLancerLotActionPerformed
 
+    private void buttonAnnulerLotActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_buttonAnnulerLotActionPerformed
+    {//GEN-HEADEREND:event_buttonAnnulerLotActionPerformed
+        if (evt.getSource() == buttonAnnulerLot)
+        {
+            new FrameAnnulerLot();
+        }
+    }//GEN-LAST:event_buttonAnnulerLotActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton buttonAnnulerLot;
     private javax.swing.JButton buttonLancerLot;
-    private javax.swing.JButton buttonRetour;
+    private javax.swing.JButton buttonRetour1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JLabel labelLotAttente;
     private javax.swing.JLabel labelLotsEnCours;
     private javax.swing.JLabel labelStock;
+    private javax.swing.JList listeLotAttente;
     private javax.swing.JList listeLotEnCour;
     private javax.swing.JTable tableStock;
     // End of variables declaration//GEN-END:variables
