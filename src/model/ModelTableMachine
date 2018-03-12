@@ -1,0 +1,394 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package model;
+
+import dao.ManagerMachine;
+import entity.Machine;
+import java.util.ArrayList;
+import javax.swing.table.AbstractTableModel;
+import render.ButtonInTable;
+import util.ReturnDataBase;
+import util.StatutObjetTable;
+
+/**
+ *
+ * @author denis
+ */
+public class ModelTableMachine extends AbstractTableModel{
+    private static ArrayList<ElementTable> listeMachine ;
+    private static ArrayList<String> nomsColonnes ;
+    private static Machine machineVide = new Machine(0, "Nouvelle machine...", true, false);
+    
+    public ModelTableMachine ()
+    {
+        initNomsColonnes() ;
+        updateListeMachine() ;
+    }
+    
+    /**
+     * Methode qui permet de vérifier si un libellé de machine est libre en parcourant la liste de machines
+     * @param libelle est le libellé à vérifier
+     * @return 
+     */
+    public boolean libelleEstLibre(String libelle)
+    {
+        boolean libre = true ;
+        for (ElementTable et : listeMachine)
+        {
+            if(libelle.equals(et.getEnCours().getLibellePresse())) libre = false ;
+        }
+        return libre ;
+    }
+    
+    /**
+     * Méthode permettant d'insérer une nouvelle machine dans la liste des machines
+     */
+    public void newMachine()
+    {
+        // On crée une nouvelle machine à partir de la machine vide
+        Machine nouvelle = new Machine(machineVide.getIdPresse(), machineVide.getLibellePresse(), machineVide.isEnService(), true);
+    
+        // On réinitialise les valeurs de la machine vide
+        machineVide.setLibellePresse("Nouvelle machine...");
+        machineVide.setEnService(true);
+        machineVide.setSupprimable(false);
+        fireTableRowsUpdated(0, 0);
+        
+        // Insertion de la nouvelle machine dans la liste
+        int parcours = 0 ;
+        Machine m = listeMachine.get(parcours).getEnCours();
+        // On parcourt la liste jusqu'à trouver ou insérer la machine alphabétiquement
+        while (parcours < listeMachine.size() && nouvelle.getLibellePresse().compareToIgnoreCase(m.getLibellePresse()) > 0)
+        {
+            parcours ++ ;
+        }
+        // On insère la nouvelle ligne dans la liste
+        listeMachine.add(parcours, new ElementTable(nouvelle, StatutObjetTable.INSERTED));
+        fireTableRowsInserted(parcours + 1, parcours + 1);  // La table comporte une ligne de plus que la liste, d'où le +1
+    }
+    
+    /**
+     * Méthode qui permet de faire un back up sur une machine qu'on a modifié
+     * @param rowIndex est la ligne de la jtable dans laquelle on trouve la machine
+     */
+    public void backupMachine(int rowIndex)
+    {
+        if(rowIndex > 1)
+        {
+            // On remet les valeurs de l'original dans la machine en cours
+            listeMachine.get(rowIndex - 1).getEnCours().recopieMachine(listeMachine.get(rowIndex - 1).getOriginal());
+            updateStatutMachine(rowIndex, StatutObjetTable.NONE);
+            // On indique que le modèle à changé
+            fireTableRowsUpdated(rowIndex, rowIndex);
+        }
+    }
+    
+    /**
+     * Méthode qui permet de supprimer une machine : si elle est issue de la base de données elle sera marquée comme supprimée, si elle a été créée par l'application la suppression sera effective immédiatement
+     * @param rowIndex est l'index de la machine à supprimer dans la table
+     */
+    public void deleteMachine(int rowIndex)
+    {
+        if(listeMachine.get(rowIndex -1 ).getStatut() == StatutObjetTable.NONE)
+        {
+            // On indique que le statut de la machine est passé à deleted en vue de mettre la base de données à jour à la fin
+            listeMachine.get(rowIndex - 1).setStatut(StatutObjetTable.DELETED);
+            fireTableRowsUpdated(rowIndex, rowIndex);
+        }
+        else if (listeMachine.get(rowIndex - 1).getStatut() == StatutObjetTable.INSERTED)
+        {
+            // On supprime la machine
+            listeMachine.remove(rowIndex - 1);
+            fireTableRowsDeleted(rowIndex, rowIndex);
+        }
+    }
+    
+    /**
+     * Méthode qui renvoie le statut d'une machine stockée dans la table
+     * @param rowIndex est l'index de la machine dans la table
+     * @return 
+     */
+    public StatutObjetTable getStatutMachine(int rowIndex)
+    {
+        StatutObjetTable statut = null ;
+        if (rowIndex >= 1) statut =  listeMachine.get(rowIndex - 1).getStatut() ;
+        return statut ;
+    }
+    
+    /**
+     * Méthode permettant de changer le statut d'une machine
+     * @param rowIndex est l'index du modele dans la table
+     * @param statut est le nouveau statut à affecter
+     */
+    public void updateStatutMachine(int rowIndex, StatutObjetTable statut)
+    {
+        if (statut != null)
+        {
+            listeMachine.get(rowIndex - 1).setStatut(statut);
+            // On indique que le statut a été modifié, donc que la dernière colonne doit être mise à jour
+            fireTableCellUpdated(rowIndex, 3);
+        }
+    }
+
+    @Override
+    public int getRowCount() {
+        return listeMachine.size() + 1 ;
+    }
+
+    @Override
+    public int getColumnCount() {
+        return nomsColonnes.size() ;
+    }
+
+    @Override
+    public Object getValueAt(int rowIndex, int columnIndex) {
+        Object retour = null;
+        Machine ma ;
+        if (rowIndex == 0)
+        // la première ligne est réservée à la création d'une nouvelle machine
+        {
+            switch(columnIndex)
+            {
+                case 0 :
+                    retour = "" + machineVide.getIdPresse() ;
+                    break ;
+                case 1 :
+                    // pour la création d'une nouvelle machine on affiche rien ou on verra plus tard
+                    retour = machineVide.getLibellePresse() ;
+                    break ;
+                case 2 :
+                    retour = machineVide.isEnService() ;
+                    break ;
+                case 3 :
+                    // Pour la première ligne on retourne toujours le code qui correspond au bouton ADD
+                    retour = ButtonInTable.ADD_MODE;
+                    break ;
+                default : // impossible de se retrouver la...
+            }
+        }
+        else
+        // toutes les autres lignes affichent les machines (attention index -1 dans la liste des machines !)
+        {
+            ma = listeMachine.get(rowIndex - 1).getEnCours() ;
+            switch(columnIndex)
+            {
+                case 0 :
+                    // On retourne le numéro de la machine s'il existe, "new !" sinon
+                    if (ma.getIdPresse() == 0)
+                    {
+                        retour = "new !" ;
+                    }
+                    else
+                    {
+                        retour = "" + ma.getIdPresse() ;
+                    }
+                    break ;
+                case 1 :
+                    // On retourne le libellé de la presse
+                    retour = ma.getLibellePresse() ;
+                    break ;
+                case 2 :
+                    // On retourne le statut de la machine
+                    retour = ma.isEnService() ;
+                    break ;
+                case 3 :
+                    // On retourne les codes qui correspondent aux boutons vides, supprimer ou undo
+                    StatutObjetTable statut = listeMachine.get(rowIndex - 1).getStatut();
+                    if (statut == StatutObjetTable.NONE)
+                    {
+                        if (ma.isSupprimable()) retour = ButtonInTable.DELETE_MODE ;
+                        else retour = ButtonInTable.NONE_MODE;
+                    }
+                    else if (statut == StatutObjetTable.INSERTED)
+                    {
+                        retour = ButtonInTable.DELETE_MODE;
+                    }
+                    else
+                    {
+                        retour = ButtonInTable.UNDO_MODE;
+                    }
+                    break ;
+                default : // impossible de se retrouver la...
+            }
+        }
+        return retour ;
+    }
+
+    @Override
+    public String getColumnName(int column) {
+        return nomsColonnes.get(column);
+    }
+    
+    /**
+     * Méthode qui permet de mettre à jour la liste de machines en allant récupérer cette liste dans la base de données
+     */
+    public void updateListeMachine()
+    {
+        listeMachine = new ArrayList<>();
+        for (Machine m : ManagerMachine.getMachineList())
+        {
+            listeMachine.add(new ElementTable(m, StatutObjetTable.NONE));
+        }
+        fireTableDataChanged();
+    }
+    
+    private static void initNomsColonnes()
+    {
+        nomsColonnes = new ArrayList<>() ;
+        nomsColonnes.add("Numéro");
+        nomsColonnes.add("Libellé");
+        nomsColonnes.add("En service");
+        nomsColonnes.add("Action");
+    }
+
+    @Override
+    public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+         // Si on modifie la première ligne (pour créer une nouvelle machine)
+        if (rowIndex == 0)
+        {
+            // Si on modifie le libellé
+            if (columnIndex == 1)
+            {
+                machineVide.setLibellePresse((String) aValue);
+            }
+            // Si on modifie le statut enService
+            else if (columnIndex == 2 && aValue instanceof Boolean)
+            {
+                machineVide.setEnService((Boolean) aValue);
+            }
+            fireTableCellUpdated(rowIndex, columnIndex);
+        }
+        
+        // Si on modifie une machine existante (attention rowIndex - 1 = index dans la liste de machines !)
+        else
+        {
+            Machine ma = listeMachine.get(rowIndex - 1).getEnCours();
+            // Si on modifie le libellé
+            if (columnIndex == 1)
+            {
+                // On change le libelle de la presse dans l'application
+                ma.setLibellePresse((String)aValue);
+                // On enregistre le fait que la machine à été modifiée si elle était au statut none
+                if (listeMachine.get(rowIndex - 1).getStatut() == StatutObjetTable.NONE) updateStatutMachine(rowIndex - 1, StatutObjetTable.UPDATED);
+            }
+            else if (columnIndex == 2 && aValue instanceof Boolean)
+            {
+                // On change le statut de la machine dans l'application
+                ma.setEnService((Boolean)aValue);
+                // On enregistre le fait que la machine à été modifiée si elle était au statut none
+                if (listeMachine.get(rowIndex - 1).getStatut() == StatutObjetTable.NONE) updateStatutMachine(rowIndex - 1, StatutObjetTable.UPDATED);
+            }
+            fireTableRowsUpdated(rowIndex, rowIndex);
+        }
+        
+        
+    }
+
+    @Override
+    public boolean isCellEditable(int rowIndex, int columnIndex) {
+        // Les colonnes 1 (libellé) et 2 (enService) sont éditables
+        return (columnIndex == 1 || columnIndex == 2 || columnIndex == 3);
+    }
+
+    @Override
+    public Class<?> getColumnClass(int columnIndex) {
+         Class classe = String.class;
+         switch(columnIndex)
+         {
+             case 0:
+                 classe = Integer.class ;
+                 break ;
+             case 1:
+                 classe = String.class;
+                 break;
+             case 2:
+                 classe = Boolean.class ;
+                 break;
+             case 3:
+                 classe = Integer.class ;
+                 break;
+         }
+         return classe ;
+    }
+    
+     /**
+     * Methode qui permet de mettre à jour la base de données avec les données récupérées dans l'application
+     * @return 
+     */
+    public ArrayList<ReturnDataBase> updateDatabase()
+    {
+        ArrayList<ReturnDataBase> logs = new ArrayList<>();
+        for (ElementTable et : listeMachine)
+        {
+            if (et.getStatut() == StatutObjetTable.DELETED)
+            {
+                logs.add(ManagerMachine.supprimerMachine(et.getOriginal()));
+            }
+            else if (et.getStatut() == StatutObjetTable.INSERTED)
+            {
+                logs.add(ManagerMachine.creerMachine(et.getEnCours()));
+            }
+            else if (et.getStatut() == StatutObjetTable.UPDATED)
+            {
+                if (et.getEnCours().isEnService() != et.getOriginal().isEnService())
+                {
+                    logs.add(ManagerMachine.updateEnServiceMachine(et.getEnCours(), et.getEnCours().isEnService()));
+                }
+                if (!et.getEnCours().getLibellePresse().equals(et.getOriginal().getLibellePresse()))
+                {
+                    logs.add(ManagerMachine.renommerMachine(et.getOriginal(), et.getEnCours().getLibellePresse()));
+                }
+            }
+        }
+        updateListeMachine();
+        return logs ;
+    }
+    
+    
+    
+    
+    
+    
+    private static class ElementTable
+    {
+        private Machine original;
+        private Machine enCours;
+        private StatutObjetTable statut;
+        
+        public ElementTable(Machine machine, StatutObjetTable sot)
+        {
+            original = machine ;
+            enCours = new Machine (machine.getIdPresse(), machine.getLibellePresse(), machine.isEnService(), machine.isSupprimable());
+            statut = sot ;
+        }
+
+        public Machine getOriginal() {
+            return original;
+        }
+
+        public void setOriginal(Machine original) {
+            this.original = original;
+        }
+
+        public Machine getEnCours() {
+            return enCours;
+        }
+
+        public void setEnCours(Machine enCours) {
+            this.enCours = enCours;
+        }
+
+        public StatutObjetTable getStatut() {
+            return statut;
+        }
+
+        public void setStatut(StatutObjetTable statut) {
+            this.statut = statut;
+        }
+        
+        
+    }
+}
