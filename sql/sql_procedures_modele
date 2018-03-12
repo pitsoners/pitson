@@ -86,15 +86,19 @@ BEGIN TRY
 			SET @codeRetour = 3 ;
 			SET @messageRetour = 'Ce modèle est encore lié à des lots existants.';
 		END
-		ELSE IF EXISTS (SELECT idModele FROM Stock WHERE idModele = @idModele)
+		ELSE IF (SELECT SUM (qtStock) FROM Stock WHERE idModele = @idModele GROUP BY idModele) <> 0
 		BEGIN
 			SET @codeRetour = 3 ;
 			SET @messageRetour = 'Ce modèle est encore lié à des pièces en stock.';
 		END
 		ELSE
 		BEGIN
+			-- Suppression du modèle dans la table modèle
 			DELETE Modele
 			FROM Modele
+			WHERE idModele = @idModele ;
+			-- Suppression du modèle dans la table stock
+			DELETE FROM Stock
 			WHERE idModele = @idModele ;
 			SET @codeRetour = 0 ;
 			SET @messageRetour = 'Modèle supprimé de la table avec succès.';
