@@ -206,7 +206,7 @@ public class ManagerMachine
             cs.registerOutParameter(3, java.sql.Types.VARCHAR);
             cs.setInt(2, aSupprimer.getIdPresse());
             cs.executeUpdate();
-            rdb = new ReturnDataBase(cs.getByte(1), cs.getString(4));
+            rdb = new ReturnDataBase(cs.getByte(1), cs.getString(3));
             if(rdb.getCode() != 0)
             {
                 System.out.println(rdb);
