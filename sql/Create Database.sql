@@ -583,10 +583,19 @@ BEGIN
 	DECLARE @codeRetour int;
 	SET @codeRetour = -1;
 	SET @messageRetour = 'non implémenté';
+	BEGIN TRANSACTION;
+	DECLARE @dummy int;
+	SELECT @dummy = sys.database_principals.sid
+	FROM sys.database_principals WITH (holdlock, tablockx),
+		sys.server_principals WITH (holdlock, tablockx),
+		sys.database_role_members WITH (holdlock, tablockx),
+		sys.database_principals WITH (holdlock, tablockx)
+	WHERE sys.database_principals.sid IS NULL
 	IF @employe IS NULL
 		BEGIN
 			SET @codeRetour = 1;
 			SET @messageRetour = 'Le paramètre 1 (@employe) ne peut être null';
+			ROLLBACK TRANSACTION;
 		END
 	ELSE IF @employe = 'dbo' OR @employe IN
 		(
@@ -600,15 +609,16 @@ BEGIN
 		BEGIN
 			SET @codeRetour = 2;
 			SET @messageRetour = 'Le paramètre 1 (@employe = ''' + @employe + ''') ne peut être le propriétaire de la base de données car c''est un utilisateur réservé.';
+			ROLLBACK TRANSACTION;
 		END
 	ELSE IF @role IS NOT NULL AND @role NOT IN ('ResponsableApplication', 'ResponsableAtelier', 'ResponsablePresse', 'Controleur', 'Magasinier', 'ResponsableQualite')
 		BEGIN
 			SET @codeRetour = 1;
 			SET @messageRetour = 'Le paramètre 2 (@role = ''' + @role + ''') est incorrect. (doit valoir ''ResponsableApplication'', ''ResponsableAtelier'', ''ResponsablePresse'', ''Controleur'', ''Magasinier'', ''ResponsableQualite'' ou NULL)';
+			ROLLBACK TRANSACTION;
 		END
 	ELSE 
 	BEGIN
-		BEGIN TRANSACTION
 		DECLARE @sql nvarchar(512);
 		BEGIN TRY
 			-- suppresion préalable de l'utilisateur s'il existe. ce qui revient à le retirer de tout role auquel il était affecté
@@ -668,21 +678,24 @@ CREATE PROC sp_demarrerControle (@idLot int, @msg varchar(250) OUTPUT)
 AS
 	DECLARE @retour int;
 	BEGIN TRY
+		BEGIN TRANSACTION;
 		-- Verification que les données ne sont pas null
 		IF @idLot IS NULL OR @idLot = ''
 		BEGIN
 			SET @retour = 1;
 			SET @msg = 'Id du lot manquant';
+			ROLLBACK TRANSACTION;
 		END
 		-- Verification de l'existance du lot
 		ELSE IF NOT EXISTS (
 							SELECT Lot.idLot
-							FROM Lot
+							FROM Lot WITH (holdlock, tablockx)
 							WHERE Lot.idLot = @IdLot
 							)
 		BEGIN
 			SET @retour = 2;
 			SET @msg = 'Ce lot n''existe pas';
+			ROLLBACK TRANSACTION;
 		END
 		-- Vérifier que la production a été lancée
 		ELSE IF EXISTS (
@@ -694,6 +707,7 @@ AS
 		BEGIN 
 			SET @retour = 2;
 			SET @msg = 'La production de ce lot n''est pas lancée ';
+			ROLLBACK TRANSACTION;
 		END
 		-- Verifier que le control n'a pas été lancé
 		ELSE IF EXISTS (
@@ -704,7 +718,8 @@ AS
 						)
 		BEGIN
 			SET @retour = 2;
-			SET @msg = 'Le control a déjà été lancée'
+			SET @msg = 'Le control a déjà été lancée';
+			ROLLBACK TRANSACTION;
 		END
 		ELSE 
 		BEGIN
@@ -712,13 +727,15 @@ AS
 				SET Lot.etatControle = 'EnCours'
 				WHERE Lot.idLot = @IdLot
 				SET @retour = 0;
-				SET @msg = 'Etat du control mise à jour de Attente à En Cour'
+				SET @msg = 'Etat du control mise à jour de Attente à En Cours';
+				COMMIT TRANSACTION;
 		END
 	END TRY
 
 		BEGIN CATCH
 			SET @retour = 3;
 			SET @msg = 'Exception' + ERROR_MESSAGE();
+			ROLLBACK TRANSACTION;
 	END CATCH
 	RETURN @retour;
 GO
@@ -739,16 +756,24 @@ CREATE PROC sp_demarrerProd (@idLot int, @idMachine int, @msg varchar(250) OUTPU
 AS
 	DECLARE @retour int;
 	BEGIN TRY
+		BEGIN TRANSACTION;
+		DECLARE @dummy int;
+		SELECT @dummy = Lot.idLot
+		FROM Lot WITH(holdlock, tablockx),
+			Machine WITH(holdlock, tablockx)
+		WHERE Lot.idLot IS NULL;
 		-- Verification que les données ne sont pas null
 		IF @idLot IS NULL OR @idLot = ''
 		BEGIN
 			SET @retour = 1;
 			SET @msg = 'Id du lot manquant';
+			ROLLBACK TRANSACTION;
 		END
 		ELSE IF @idMachine IS NULL OR @idMachine = ''
 		BEGIN
 			SET @retour = 1;
 			SET @msg = 'Machine manquante';
+			ROLLBACK TRANSACTION;
 		END
 		-- Verification de l'existance du lot
 		ELSE IF NOT EXISTS (
@@ -759,6 +784,7 @@ AS
 		BEGIN
 			SET @retour = 2;
 			SET @msg = 'Ce lot n''existe pas';
+			ROLLBACK TRANSACTION;
 		END
 		-- Vérifier que la production n'a pas déjà été lancée
 		ELSE IF NOT	EXISTS (
@@ -770,6 +796,7 @@ AS
 		BEGIN 
 			SET @retour = 2;
 			SET @msg = 'La production de ce lot est déjà lancée';
+			ROLLBACK TRANSACTION;
 		END
 		-- Verifier que le control n'a pas été lancé
 		ELSE IF NOT EXISTS (
@@ -780,7 +807,8 @@ AS
 							)
 		BEGIN
 			SET @retour = 2;
-			SET @msg = 'Le control a déjà été lancée'
+			SET @msg = 'Le controle a déjà été lancée';
+			ROLLBACK TRANSACTION;
 		END
 		-- Verification de disponibilité de la machine
 		ELSE IF NOT EXISTS (
@@ -790,7 +818,8 @@ AS
 							)
 		BEGIN
 			SET @retour = 2;
-			SET @msg = 'La machine n''est pas disponible'
+			SET @msg = 'La machine n''est pas disponible';
+			ROLLBACK TRANSACTION;
 		END
 		ELSE 
 		BEGIN
@@ -801,14 +830,15 @@ AS
 			WHERE Lot.idLot = @idLot
 
 			SET @retour = 0;
-			SET @msg = 'Etat de la production mise à jour de "Attente" à "En Cours"'
+			SET @msg = 'Etat de la production mise à jour de "Attente" à "En Cours"';
+			COMMIT TRANSACTION;
 		END
 	END TRY
-
 		BEGIN CATCH
 			SET @retour = 3;
 			SET @msg = 'Exception' + ERROR_MESSAGE();
-	END CATCH
+			ROLLBACK TRANSACTION;
+		END CATCH
 	RETURN @retour;
 GO
 
@@ -822,23 +852,32 @@ BEGIN
 	declare @return int;
 
 	begin try
+		BEGIN TRANSACTION;
+		DECLARE @dummy TypeIdModele;
+		SELECT @dummy = Modele.TypeIdModele
+		FROM Modele WITH(holdlock, tablockx),
+			Stock WITH(holdlock, tablockx)
+		WHERE Modele.idModele IS NULL;
 	-- verification des données entrées
 		if @idModele = NULL OR @idModele = ''
 		begin
 			set @return = 1;
-			set @msg = 'Id du modele null ou manquant !'
+			set @msg = 'Id du modele null ou manquant !';
+			ROLLBACK TRANSACTION;
 		end
 		
 		else if @idCategorie = NULL OR @idCategorie = ''
 		begin
 			set @return = 1;
-			set @msg = 'Id du categorie null ou manquant !'
+			set @msg = 'Id du categorie null ou manquant !';
+			ROLLBACK TRANSACTION;
 		end
 		
 		else if @qtEntree = NULL or @qtEntree <= 0
 		begin
 			set @return = 1;
-			set @msg = 'Quantitée entrée invalide !'
+			set @msg = 'Quantitée entrée invalide !';
+			ROLLBACK TRANSACTION;
 		end
 
 		else if not exists(
@@ -848,28 +887,32 @@ BEGIN
 							)
 		begin
 			set @return = 2;
-			set @msg = 'Modele inexistant !'
+			set @msg = 'Modele inexistant !';
+			ROLLBACK TRANSACTION;
 		end
 
 		else if @idCategorie <> 'Petit' AND @idCategorie <> 'Moyen' AND @idCategorie <> 'Grand' 
 		begin
 			set @return = 2;
-			set @msg = 'Categorie invalide !'
+			set @msg = 'Categorie invalide !';
+			ROLLBACK TRANSACTION;
 		end
 
 		else
 		begin
 			UPDATE Stock
 			set qtStock = qtStock + @qtEntree
-			where Stock.idModele = @idModele AND Stock.idCategorie = @idCategorie
-				set @return = 0;
-				set @msg = 'Quantitée ajoutée au stock'
+			where Stock.idModele = @idModele AND Stock.idCategorie = @idCategorie;
+			set @return = 0;
+			set @msg = 'Quantitée ajoutée au stock';
+			COMMIT TRANSACTION;
 		end
 	end try
 
 	begin catch
 			set @return = 3;
 			set @msg = 'Exception' + ERROR_MESSAGE();
+			ROLLBACK TRANSACTION;
 	end catch
 
 	RETURN @return;
@@ -895,21 +938,29 @@ BEGIN
 	DECLARE @codeRetour int;
 	SET @codeRetour = -1;
 	SET @messageRetour = 'non implémenté';
-
+	BEGIN TRANSACTION;
+	DECLARE @dummy int;
+	SELECT @dummy = idLot
+	FROM Lot WITH (holdlock, tablockx),
+		Modele WITH (holdlock, tablockx)
+	WHERE Lot.idLot IS NULL;
 	IF @modele IS NULL
 		BEGIN
 			SET @codeRetour = 1;
 			SET @messageRetour = 'Le paramètre 1 (@modele) ne peut être NULL';
+			ROLLBACK TRANSACTION;
 		END
 	ELSE IF @quantite IS NULL
 		BEGIN
 			SET @codeRetour = 1;
 			SET @messageRetour = 'Le paramètre 2 (@quantite) ne peut être NULL';
+			ROLLBACK TRANSACTION;
 		END
 	ELSE IF @quantite <= 0
 		BEGIN
 			SET @codeRetour = 2;
 			SET @messageRetour = 'La quantité spécifiée est incorrecte';
+			ROLLBACK TRANSACTION;
 		END
 	ELSE
 		BEGIN TRY
@@ -922,6 +973,7 @@ BEGIN
 				BEGIN
 					SET @codeRetour = 2;
 					SET @messageRetour = 'Le modèle ''' + @modele + ''' n''existe pas.';
+					ROLLBACK TRANSACTION;
 				END
 			ELSE
 				BEGIN
@@ -932,11 +984,13 @@ BEGIN
 					SELECT @idLot = idLot FROM @tab;
 					SET @codeRetour = 0;
 					SET @messageRetour = 'Lot ajouté';
+					COMMIT TRANSACTION;
 				END
 		END TRY
 		BEGIN CATCH
 			SET @codeRetour = 3;
 			SET @messageRetour = 'Erreur base de donnée : ' + ERROR_MESSAGE();
+			ROLLBACK TRANSACTION;
 		END CATCH
 	RETURN @codeRetour;
 END
@@ -963,80 +1017,101 @@ AS
 DECLARE @codeRetour TINYINT ;
 BEGIN TRY
 	BEGIN
-		IF EXISTS (SELECT * FROM Lot)
+		BEGIN TRANSACTION;
+		DECLARE @dummy int;
+		SELECT @dummy = idLot
+		FROM Lot WITH (holdlock, tablockx),
+			Categorie WITH (holdlock, tablockx)
+		WHERE idLot IS NULL;
+		IF EXISTS (SELECT idLot FROM Lot)
 		BEGIN
 			SET @codeRetour = 3 ;
 			SET @messageRetour = 'Des lots on déjà été créés, les seuils de tolérance des catégories sont maintenant verrouillées.';
+			ROLLBACK TRANSACTION;
 		END
 		ELSE IF @minPetit IS NULL
 		BEGIN
 			SET @codeRetour = 1 ;
 			SET @messageRetour = 'La borne minimum de la catégorie petit est nulle.';
+			ROLLBACK TRANSACTION;
 		END
 		ELSE IF @maxPetit IS NULL
 		BEGIN
 			SET @codeRetour = 1 ;
 			SET @messageRetour = 'La borne maximum de la catégorie petit est nulle.';
+			ROLLBACK TRANSACTION;
 		END
 		ELSE IF @minMoyen IS NULL
 		BEGIN
 			SET @codeRetour = 1 ;
 			SET @messageRetour = 'La borne minimum de la catégorie moyen est nulle.';
+			ROLLBACK TRANSACTION;
 		END
 		ELSE IF @maxMoyen IS NULL
 		BEGIN
 			SET @codeRetour = 1 ;
 			SET @messageRetour = 'La borne maximum de la catégorie moyen est nulle.';
+			ROLLBACK TRANSACTION;
 		END
 		ELSE IF @minGrand IS NULL
 		BEGIN
 			SET @codeRetour = 1 ;
 			SET @messageRetour = 'La borne minimum de la catégorie grand est nulle.';
+			ROLLBACK TRANSACTION;
 		END
 		ELSE IF @maxGrand IS NULL
 		BEGIN
 			SET @codeRetour = 1 ;
 			SET @messageRetour = 'La borne maximum de la catégorie grand est nulle.';
+			ROLLBACK TRANSACTION;
 		END
 		ELSE IF @minPetit >= @maxPetit
 		BEGIN
 			SET @codeRetour = 2 ;
 			SET @messageRetour = 'La borne maximum de la catégorie petit est inférieure à sa borne minimum.';
+			ROLLBACK TRANSACTION;
 		END
 		ELSE IF @minMoyen >= @maxMoyen
 		BEGIN
 			SET @codeRetour = 2 ;
 			SET @messageRetour = 'La borne maximum de la catégorie moyen est inférieure à sa borne minimum.';
+			ROLLBACK TRANSACTION;
 		END
 		ELSE IF @minGrand >= @maxGrand
 		BEGIN
 			SET @codeRetour = 2 ;
 			SET @messageRetour = 'La borne maximum de la catégorie grand est inférieure à sa borne minimum.';
+			ROLLBACK TRANSACTION;
 		END
 		ELSE IF @minPetit >= @minMoyen
 		BEGIN
 			SET @codeRetour = 2 ;
 			SET @messageRetour = 'La borne minimum de la catégorie petit est supérieure à la borne minimum de la catégorie moyen.';
+			ROLLBACK TRANSACTION;
 		END
 		ELSE IF @maxMoyen >= @maxGrand
 		BEGIN
 			SET @codeRetour = 2 ;
 			SET @messageRetour = 'La borne maximum de la catégorie moyen est supérieure à la borne maximum de la catégorie grand.';
+			ROLLBACK TRANSACTION;
 		END
 		ELSE IF @minMoyen > @maxPetit
 		BEGIN
 			SET @codeRetour = 2 ;
 			SET @messageRetour = 'La borne minimum de la catégorie moyen est strictement supérieure à la borne maximum de la catégorie petit.';
+			ROLLBACK TRANSACTION;
 		END
 		ELSE IF @maxMoyen < @minGrand
 		BEGIN
 			SET @codeRetour = 2 ;
 			SET @messageRetour = 'La borne maximum de la catégorie moyen est strictement inférieure à la borne minimum de la catégorie grand.';
+			ROLLBACK TRANSACTION;
 		END
 		ELSE IF @maxPetit > @minGrand
 		BEGIN
 			SET @codeRetour = 2 ;
 			SET @messageRetour = 'La borne maximum de la catégorie petit est strictement supérieure à la borne minimum de la catégorie grand.';
+			ROLLBACK TRANSACTION;
 		END
 		ELSE
 		BEGIN
@@ -1071,12 +1146,14 @@ BEGIN TRY
 
 			SET @codeRetour = 0 ;
 			SET @messageRetour = 'Les valeurs des seuils de tolérances ont été mis à jour.';
+			COMMIT TRANSACTION;
 		END
 	END
 END TRY
 BEGIN CATCH
 	SET @codeRetour = 4 ;
 	SET @messageRetour = 'Erreur base de données : ' + ERROR_MESSAGE() ;
+	ROLLBACK TRANSACTION;
 END CATCH
 RETURN @codeRetour ;
 GO
