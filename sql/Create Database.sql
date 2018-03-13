@@ -519,7 +519,6 @@ AS
 BEGIN
 	DECLARE @codeRetour int = -1;
 	SET @messageRetour = 'non implementé';
-
 	IF @idLot IS NULL
 		BEGIN
 			SET @codeRetour = 1;
@@ -527,15 +526,17 @@ BEGIN
 		END
 	ELSE
 		BEGIN TRY
+			BEGIN TRANSACTION;
 			IF NOT EXISTS
 				(
 					SELECT idLot
-					FROM Lot
+					FROM Lot WITH (HOLDLOCK, TABLOCKX)
 					WHERE idLot = @idLot
 				)
 				BEGIN
 					SET @codeRetour = 2;
 					SET @messageRetour = 'Le lot ''' + convert(varchar(10), @idLot) + ''' n''existe pas';
+					ROLLBACK TRANSACTION;
 				END
 			ELSE
 				BEGIN
@@ -543,18 +544,21 @@ BEGIN
 					IF @@ROWCOUNT = 0
 						BEGIN
 							SET @codeRetour = 2;
-							SET @messageRetour = 'impossible d''annuler le lot ''' + convert(varchar(10), @idLot) + ''' car sa production a déjà démarré'
+							SET @messageRetour = 'impossible d''annuler le lot ''' + convert(varchar(10), @idLot) + ''' car sa production a déjà démarré';
+							ROLLBACK TRANSACTION;
 						END
 					ELSE
 						BEGIN
 							SET @codeRetour = 0;
 							SET @messageRetour = 'Le lot '''+ convert(varchar(10), @idLot) +'''a bient été annulé';
+							COMMIT TRANSACTION;
 						END
 				END
 		END TRY
 		BEGIN CATCH
 			SET @codeRetour = 3;
 			SET @messageRetour = 'Erreur base de données : ' + ERROR_MESSAGE();
+			ROLLBACK TRANSACTION;
 		END CATCH
 	RETURN @codeRetour;
 END
