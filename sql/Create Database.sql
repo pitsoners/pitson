@@ -1189,23 +1189,31 @@ AS
 	declare @return int;
 
 	begin try
+		DECLARE @dummy TypeIdModele;
+		SELECT @dummy = Modele.idModele
+		FROM Modele WITH (holdlock, tablockx),
+			Stock WITH (holdlock, tablockx)
+		WHERE idModele IS NULL;
 	-- verification des données entrées
 		if @idModele = NULL OR @idModele = ''
 		begin
 			set @return = 1;
-			set @msg = 'Id du modele null ou manquant !'
+			set @msg = 'Id du modele null ou manquant !';
+			ROLLBACK TRANSACTION;
 		end
 		
 		else if @idCategorie = NULL OR @idCategorie = ''
 		begin
 			set @return = 1;
-			set @msg = 'Id du categorie null ou manquant !'
+			set @msg = 'Id du categorie null ou manquant !';
+			ROLLBACK TRANSACTION;
 		end
 		
 		else if @qtSortie = NULL or @qtSortie <= 0
 		begin
 			set @return = 1;
-			set @msg = 'Quantitée sortie invalide !'
+			set @msg = 'Quantitée sortie invalide !';
+			ROLLBACK TRANSACTION;
 		end
 		else if not exists(
 							SELECT idModele, idCategorie
@@ -1214,18 +1222,21 @@ AS
 							)
 			begin
 				set @return = 2;
-				set @msg = 'Pas de stock pour ce modele et cette categorie !'
+				set @msg = 'Pas de stock pour ce modele et cette categorie !';
+				ROLLBACK TRANSACTION;
 			end
 
 		else if @qtSortie > (SELECT qtStock FROM Stock where Stock.idModele = @idModele AND Stock.idCategorie = @idCategorie)
 			begin
 				set @return = 2;
-				set @msg = 'Stock insuffisant !'
+				set @msg = 'Stock insuffisant !';
+				ROLLBACK TRANSACTION;
 			end
 		else if @idCategorie <> 'Petit' AND @idCategorie <> 'Moyen' AND @idCategorie <> 'Grand' 
 		begin
 			set @return = 2;
-			set @msg = 'Categorie invalide !'
+			set @msg = 'Categorie invalide !';
+			ROLLBACK TRANSACTION;
 		end
 
 		else
@@ -1234,13 +1245,15 @@ AS
 			set qtStock = qtStock - @qtSortie
 			where Stock.idModele = @idModele AND Stock.idCategorie = @idCategorie
 			set @return = 0;
-			set @msg = 'Quantitée sortie du stock'
+			set @msg = 'Quantitée sortie du stock';
+			COMMIT TRANSACTION;
 		end
 	end try
 
 	begin catch
 			set @return = 3;
 			set @msg = 'Exception' + ERROR_MESSAGE();
+			ROLLBACK TRANSACTION;
 	end catch
 
 	RETURN @return;
@@ -1378,21 +1391,24 @@ CREATE PROC sp_terminerControle (@idLot int, @msg varchar(250) OUTPUT)
 AS
 	DECLARE @retour int;
 	BEGIN TRY
+		BEGIN TRANSACTION;
 		-- Verification que les données ne sont pas null
 		IF @idLot IS NULL OR @idLot = ''
 		BEGIN
 			SET @retour = 1;
 			SET @msg = 'Id du lot manquant';
+			ROLLBACK TRANSACTION;
 		END
 		-- Verification de l'existance du lot
 		ELSE IF NOT EXISTS (
 							SELECT Lot.idLot
-							FROM Lot
+							FROM Lot WITH (holdlock, tablockx)
 							WHERE Lot.idLot = @IdLot
 							)
 		BEGIN
 			SET @retour = 2;
 			SET @msg = 'Ce lot n''existe pas';
+			ROLLBACK TRANSACTION;
 		END
 		ELSE IF NOT EXISTS (
 						SELECT lot.idLot
@@ -1402,7 +1418,8 @@ AS
 						)
 		BEGIN
 			SET @retour = 2;
-			SET @msg = 'Le controle de ce lot n''a pas commencé ou est déjà terminé'
+			SET @msg = 'Le controle de ce lot n''a pas commencé ou est déjà terminé';
+			ROLLBACK TRANSACTION;
 		END 
 		-- Vérifier que la production est terminée
 		ELSE IF NOT EXISTS (
@@ -1414,6 +1431,7 @@ AS
 		BEGIN 
 			SET @retour = 2;
 			SET @msg = 'La production n''est par terminée';
+			ROLLBACK TRANSACTION;
 		END
 		ELSE 
 		BEGIN
@@ -1421,13 +1439,15 @@ AS
 			SET Lot.etatControle = 'Termine'
 			WHERE Lot.idLot = @IdLot
 			SET @retour = 0;
-			SET @msg = 'Etat du controle mis à jour de "En Cour" à "Terminé" '
+			SET @msg = 'Etat du controle mis à jour de "En Cour" à "Terminé" ';
+			COMMIT TRANSACTION;
 		END
 	END TRY
 
 		BEGIN CATCH
 			SET @retour = 3;
 			SET @msg = 'Exception' + ERROR_MESSAGE();
+			ROLLBACK TRANSACTION;
 	END CATCH
 	RETURN @retour;
 GO
@@ -1449,21 +1469,24 @@ CREATE PROC sp_terminerProd (@idLot int, @msg varchar(250) OUTPUT)
 AS
 	DECLARE @retour int;
 	BEGIN TRY
+		BEGIN TRANSACTION;
 		-- Verification que les données ne sont pas null
 		IF @idLot IS NULL OR @idLot = ''
 		BEGIN
 			SET @retour = 1;
 			SET @msg = 'Id du lot manquant';
+			ROLLBACK TRANSACTION;
 		END
 		-- Verification de l'existance du lot
 		ELSE IF NOT EXISTS (
 							SELECT Lot.idLot
-							FROM Lot
+							FROM Lot WITH (holdlock, tablockx)
 							WHERE Lot.idLot = @idLot
 							)
 		BEGIN
 			SET @retour = 2;
 			SET @msg = 'Ce lot n''existe pas';
+			ROLLBACK TRANSACTION;
 		END
 		-- Vérifier que la production n'a pas déjà été lancée ou est déjà terminé
 		ELSE IF NOT EXISTS (
@@ -1475,6 +1498,7 @@ AS
 		BEGIN 
 			SET @retour = 2;
 			SET @msg = 'La production de ce lot n''a pas été lancée ou a déjà été terminée';
+			ROLLBACK TRANSACTION;
 		END
 		ELSE 
 		BEGIN
@@ -1482,13 +1506,15 @@ AS
 			SET Lot.etatProduction = 'Termine'
 			WHERE Lot.idLot = @idLot
 			SET @retour = 0;
-			SET @msg = 'Etat de la production mise à jour de En Cour à Terminé'
+			SET @msg = 'Etat de la production mise à jour de En Cour à Terminé';
+			COMMIT TRANSACTION;
 		END
 	END TRY
 
 		BEGIN CATCH
 			SET @retour = 3;
 			SET @msg = 'Exception' + ERROR_MESSAGE();
+			ROLLBACK TRANSACTION;
 	END CATCH
 	RETURN @retour;
 GO
@@ -1510,16 +1536,19 @@ DECLARE @codeRetour Tinyint;
 
 BEGIN TRY
 	BEGIN
+		BEGIN TRANSACTION
 		SET @iDcree = -1 ;
 		IF @libellePresse IS NULL OR @libellePresse = ''
 		BEGIN
 			SET @codeRetour = 1 ;
 			SET @messageRetour = 'Nom de la presse nul ou vide.';
+			ROLLBACK TRANSACTION;
 		END
-		ELSE IF EXISTS (SELECT libellePresse FROM Machine WHERE libellePresse = @libellePresse)
+		ELSE IF EXISTS (SELECT libellePresse FROM Machine WITH(holdlock, tablockx) WHERE libellePresse = @libellePresse)
 		BEGIN
 			SET @codeRetour = 2 ;
 			SET @messageRetour = 'Nom de la presse déjà existant.';
+			ROLLBACK TRANSACTION;
 		END
 		ELSE
 		BEGIN
@@ -1528,12 +1557,14 @@ BEGIN TRY
 			SET @codeRetour = 0 ;
 			SET @messageRetour = 'Machine ajouté dans la table avec succès.';
 			SET @iDcree = (SELECT idPresse FROM MACHINE WHERE libellePresse = @libellePresse) ;
+			COMMIT TRANSACTION;
 		END
 	END
 END TRY
 BEGIN CATCH
 	SET @messageRetour = 'Erreur base de données : ' + ERROR_MESSAGE() ;
 	SET @codeRetour = 3 ;
+	ROLLBACK TRANSACTION;
 END CATCH
 
 RETURN @codeRetour;
@@ -1557,20 +1588,29 @@ DECLARE @codeRetour Tinyint;
 
 BEGIN TRY
 	BEGIN
+		BEGIN TRANSACTION;
+		DECLARE @dummy int;
+		SELECT @dummy = idLot
+			FROM Lot WITH(holdlock, tablockx),
+			Machine WITH(holdlock, tablockx)
+			WHERE idLot IS NULL;
 		IF @idPresse IS NULL OR @idPresse <= 0
 		BEGIN
 			SET @codeRetour = 1 ;
 			SET @messageRetour = 'ID presse nul ou négatif.';
+			ROLLBACK TRANSACTION;
 		END
 		ELSE IF NOT EXISTS (SELECT idPresse FROM Machine WHERE idPresse = @idPresse)
 		BEGIN
 			SET @codeRetour = 2 ;
 			SET @messageRetour = 'Cette presse n''existe pas dans la table.';
+			ROLLBACK TRANSACTION;
 		END
 		ELSE IF EXISTS (SELECT idPresse FROM Lot WHERE idPresse = @idPresse)
 		BEGIN
 			SET @codeRetour = 3 ;
 			SET @messageRetour = 'Cette presse est encore liée à des lots existants.';
+			ROLLBACK TRANSACTION;
 		END
 		ELSE
 		BEGIN
@@ -1578,12 +1618,14 @@ BEGIN TRY
 			WHERE idPresse = @idPresse ;
 			SET @codeRetour = 0 ;
 			SET @messageRetour = 'Machine supprimée de la table avec succès.';
+			COMMIT TRANSACTION;
 		END
 	END
 END TRY
 BEGIN CATCH
 	SET @messageRetour = 'Erreur base de données : ' + ERROR_MESSAGE() ;
 	SET @codeRetour = 4 ;
+	ROLLBACK TRANSACTION;
 END CATCH
 
 RETURN @codeRetour;
@@ -1607,25 +1649,35 @@ DECLARE @codeRetour Tinyint;
 
 BEGIN TRY
 	BEGIN
+		BEGIN TRANSACTION;
+		DECLARE @dummy int;
+		SELECT @dummy = idLot
+		FROM Lot WITH(holdlock, tablockx),
+		Machine WITH(holdlock, tablockx)
+		WHERE idLot IS NULL;
 		IF @idPresseARenommer IS NULL OR @idPresseARenommer <= 0
 		BEGIN
 			SET @codeRetour = 1 ;
 			SET @messageRetour = 'Numéro de presse à renommer nul ou négatif.';
+			ROLLBACK TRANSACTION;
 		END
 		ELSE IF @nouveauNom IS NULL OR @nouveauNom = ''
 		BEGIN
 			SET @codeRetour = 1 ;
 			SET @messageRetour = 'Nouveau nom de presse nul ou vide.';
+			ROLLBACK TRANSACTION;
 		END
 		ELSE IF NOT EXISTS (SELECT idPresse FROM Machine WHERE idPresse = @idPresseARenommer)
 		BEGIN
 			SET @codeRetour = 2 ;
 			SET @messageRetour = 'La presse à renommer n''existe pas dans la table.';
+			ROLLBACK TRANSACTION;
 		END
 		ELSE IF EXISTS (SELECT idPresse FROM Machine WHERE libellePresse = @nouveauNom)
 		BEGIN
 			SET @codeRetour = 3 ;
 			SET @messageRetour = 'Le nouveau nom à affecter à la presse existe déjà dans la table.';
+			ROLLBACK TRANSACTION;
 		END
 		ELSE
 		BEGIN
@@ -1634,12 +1686,14 @@ BEGIN TRY
 			WHERE idPresse = @idPresseARenommer ;
 			SET @codeRetour = 0 ;
 			SET @messageRetour = 'Presse renommée avec succès.';
+			COMMIT TRANSACTION;
 		END
 	END
 END TRY
 BEGIN CATCH
 	SET @messageRetour = 'Erreur base de données : ' + ERROR_MESSAGE() ;
 	SET @codeRetour = 4 ;
+	ROLLBACK TRANSACTION;
 END CATCH
 
 RETURN @codeRetour;
@@ -1664,25 +1718,30 @@ DECLARE @codeRetour Tinyint;
 
 BEGIN TRY
 	BEGIN
+		BEGIN TRANSACTION;
 		IF @idPresse IS NULL OR @idPresse <= 0
 		BEGIN
 			SET @codeRetour = 1 ;
 			SET @messageRetour = 'Nom de la presse à mettre à jour nul ou vide.';
+			ROLLBACK TRANSACTION;
 		END
 		ELSE IF @enService IS NULL OR (@enService <> 0 AND @enService <> 1)
 		BEGIN
 			SET @codeRetour = 1 ;
 			SET @messageRetour = 'Le statut à affecter est nul ou du mauvais format.';
+			ROLLBACK TRANSACTION;
 		END
-		ELSE IF NOT EXISTS (SELECT idPresse FROM Machine WHERE idPresse = @idPresse)
+		ELSE IF NOT EXISTS (SELECT idPresse FROM Machine WITH (holdlock, tablockx) WHERE idPresse = @idPresse)
 		BEGIN
 			SET @codeRetour = 2 ;
 			SET @messageRetour = 'La presse à mettre à jour n''existe pas dans la table.';
+			ROLLBACK TRANSACTION;
 		END
 		ELSE IF EXISTS (SELECT idLot FROM Lot WHERE etatProduction = 'EnCours' AND idPresse = @idPresse)
 		BEGIN
 			SET @codeRetour = 3 ;
 			SET @messageRetour = 'Il y a des lots en cours de production sur cette presse.';
+			ROLLBACK TRANSACTION;
 		END
 		ELSE
 		BEGIN
@@ -1691,12 +1750,14 @@ BEGIN TRY
 			WHERE idPresse = @idPresse ;
 			SET @codeRetour = 0 ;
 			SET @messageRetour = 'Statut mis à jour avec succès.';
+			COMMIT TRANSACTION;
 		END
 	END
 END TRY
 BEGIN CATCH
 	SET @messageRetour = 'Erreur base de données : ' + ERROR_MESSAGE() ;
 	SET @codeRetour = 4 ;
+	ROLLBACK TRANSACTION;
 END CATCH
 
 RETURN @codeRetour;
@@ -1719,20 +1780,24 @@ DECLARE @codeRetour Tinyint;
 
 BEGIN TRY
 	BEGIN
+		BEGIN TRANSACTION;
 		IF @idModele IS NULL OR @idModele = ''
 		BEGIN
 			SET @codeRetour = 1 ;
 			SET @messageRetour = 'Nom du modèle nul ou vide.';
+			ROLLBACK TRANSACTION;
 		END
 		ELSE IF @diametre IS NULL OR @diametre <= 0
 		BEGIN
 			SET @codeRetour = 1 ;
 			SET @messageRetour = 'Le diamètre renseigné est nul ou négatif.';
+			ROLLBACK TRANSACTION;
 		END
-		ELSE IF EXISTS (SELECT idModele FROM Modele WHERE idModele = @idModele)
+		ELSE IF EXISTS (SELECT idModele FROM Modele WITH (holdlock, tablockx) WHERE idModele = @idModele)
 		BEGIN
 			SET @codeRetour = 2 ;
 			SET @messageRetour = 'Nom du modèle déjà existant.';
+			ROLLBACK TRANSACTION;
 		END
 		ELSE
 		BEGIN
@@ -1743,12 +1808,14 @@ BEGIN TRY
 			INSERT INTO Stock VALUES(@idModele, 'Grand', 0, 4);
 			SET @codeRetour = 0 ;
 			SET @messageRetour = 'Modèle ajouté dans la table avec succès.';
+			COMMIT TRANSACTION;
 		END
 	END
 END TRY
 BEGIN CATCH
 	SET @messageRetour = 'Erreur base de données : ' + ERROR_MESSAGE() ;
 	SET @codeRetour = 3 ;
+	ROLLBACK TRANSACTION;
 END CATCH
 
 RETURN @codeRetour;
@@ -1772,25 +1839,35 @@ DECLARE @codeRetour Tinyint;
 
 BEGIN TRY
 	BEGIN
+		BEGIN TRANSACTION;
+		DECLARE @dummy int;
+		SELECT @dummy = idLot
+		FROM Lot WITH (holdlock, tablockx),
+			Modele WITH (holdlock, tablockx)
+		WHERE idLot IS NULL;
 		IF @idModele IS NULL OR @idModele = ''
 		BEGIN
 			SET @codeRetour = 1 ;
 			SET @messageRetour = 'Nom du modèle nul ou vide.';
+			ROLLBACK TRANSACTION;
 		END
 		ELSE IF NOT EXISTS (SELECT idModele FROM Modele WHERE idModele = @idModele)
 		BEGIN
 			SET @codeRetour = 2 ;
 			SET @messageRetour = 'Ce modèle n''existe pas dans la table.';
+			ROLLBACK TRANSACTION;
 		END
 		ELSE IF EXISTS (SELECT idModele FROM Lot WHERE idModele = @idModele)
 		BEGIN
 			SET @codeRetour = 3 ;
 			SET @messageRetour = 'Ce modèle est encore lié à des lots existants.';
+			ROLLBACK TRANSACTION;
 		END
 		ELSE IF EXISTS (SELECT idModele FROM Stock WHERE idModele = @idModele)
 		BEGIN
 			SET @codeRetour = 3 ;
 			SET @messageRetour = 'Ce modèle est encore lié à des pièces en stock.';
+			ROLLBACK TRANSACTION;
 		END
 		ELSE
 		BEGIN
@@ -1799,12 +1876,14 @@ BEGIN TRY
 			WHERE idModele = @idModele ;
 			SET @codeRetour = 0 ;
 			SET @messageRetour = 'Modèle supprimé de la table avec succès.';
+			COMMIT TRANSACTION;
 		END
 	END
 END TRY
 BEGIN CATCH
 	SET @messageRetour = 'Erreur base de données : ' + ERROR_MESSAGE() ;
 	SET @codeRetour = 4 ;
+	ROLLBACK TRANSACTION;
 END CATCH
 
 RETURN @codeRetour;
@@ -1828,25 +1907,30 @@ DECLARE @codeRetour Tinyint;
 
 BEGIN TRY
 	BEGIN
+		BEGIN TRANSACTION;
 		IF @idModeleARenommer IS NULL OR @idModeleARenommer = ''
 		BEGIN
 			SET @codeRetour = 1 ;
 			SET @messageRetour = 'Nom du modèle à renommer nul ou vide.';
+			ROLLBACK TRANSACTION;
 		END
 		ELSE IF @nouveauNom IS NULL OR @nouveauNom = ''
 		BEGIN
 			SET @codeRetour = 1 ;
 			SET @messageRetour = 'Nouveau nom de modèle nul ou vide.';
+			ROLLBACK TRANSACTION;
 		END
-		ELSE IF NOT EXISTS (SELECT idModele FROM Modele WHERE idModele = @idModeleARenommer)
+		ELSE IF NOT EXISTS (SELECT idModele FROM Modele WITH (holdlock, tablockx) WHERE idModele = @idModeleARenommer)
 		BEGIN
 			SET @codeRetour = 2 ;
 			SET @messageRetour = 'Le modèle à renommer n''existe pas dans la table.';
+			ROLLBACK TRANSACTION;
 		END
 		ELSE IF EXISTS (SELECT idModele FROM Modele WHERE idModele = @nouveauNom)
 		BEGIN
 			SET @codeRetour = 3 ;
 			SET @messageRetour = 'Le nouveau nom à affecter au modèle existe déjà dans la table.';
+			ROLLBACK TRANSACTION;
 		END
 		ELSE
 		BEGIN
@@ -1855,12 +1939,14 @@ BEGIN TRY
 			WHERE idModele = @idModeleARenommer ;
 			SET @codeRetour = 0 ;
 			SET @messageRetour = 'Modèle renommé avec succès.';
+			COMMIT TRANSACTION;
 		END
 	END
 END TRY
 BEGIN CATCH
 	SET @messageRetour = 'Erreur base de données : ' + ERROR_MESSAGE() ;
 	SET @codeRetour = 4 ;
+	ROLLBACK TRANSACTION;
 END CATCH
 
 RETURN @codeRetour;
@@ -1884,20 +1970,24 @@ DECLARE @codeRetour Tinyint;
 
 BEGIN TRY
 	BEGIN
+		BEGIN TRANSACTION;
 		IF @idModele IS NULL OR @idModele = ''
 		BEGIN
 			SET @codeRetour = 1 ;
 			SET @messageRetour = 'Nom du modèle à mettre à jour nul ou vide.';
+			ROLLBACK TRANSACTION;
 		END
 		ELSE IF @statut IS NULL OR (@statut <> 0 AND @statut <> 1)
 		BEGIN
 			SET @codeRetour = 1 ;
 			SET @messageRetour = 'Le statut à affecter est nul ou du mauvais format.';
+			ROLLBACK TRANSACTION;
 		END
-		ELSE IF NOT EXISTS (SELECT idModele FROM Modele WHERE idModele = @idModele)
+		ELSE IF NOT EXISTS (SELECT idModele FROM Modele WITH (holdlock, tablockx) WHERE idModele = @idModele)
 		BEGIN
 			SET @codeRetour = 2 ;
 			SET @messageRetour = 'Le modèle n''existe pas dans la table.';
+			ROLLBACK TRANSACTION;
 		END
 		ELSE
 		BEGIN
@@ -1906,12 +1996,14 @@ BEGIN TRY
 			WHERE idModele = @idModele ;
 			SET @codeRetour = 0 ;
 			SET @messageRetour = 'Statut mis à jour avec succès.';
+			COMMIT TRANSACTION;
 		END
 	END
 END TRY
 BEGIN CATCH
 	SET @messageRetour = 'Erreur base de données : ' + ERROR_MESSAGE() ;
 	SET @codeRetour = 4 ;
+	ROLLBACK TRANSACTION;
 END CATCH
 
 RETURN @codeRetour;
@@ -1932,11 +2024,18 @@ CREATE PROC sp_modifierLot (@idLot int, @qtLot int, @idModele TypeIDModele, @msg
 AS
 	DECLARE @retour int;
 	BEGIN TRY
+		BEGIN TRANSACTION;
+		DECLARE @dummy int;
+		SELECT @dummy = idLot
+		FROM Lot with(holdlock, tablockx),
+			Modele with (holdlock, tablockx)
+		WHERE idLot IS NULL;
 		-- Verification que les données ne sont pas null
 		IF @idLot IS NULL OR @idLot = ''
 		BEGIN
 			SET @retour = 1;
 			SET @msg = 'Id du lot manquant';
+			ROLLBACK TRANSACTION;
 		END
 		-- Verification de l'existance du lot
 		ELSE IF NOT EXISTS (
@@ -1947,20 +2046,23 @@ AS
 		BEGIN
 			SET @retour = 2;
 			SET @msg = 'Ce lot n''existe pas';
+			ROLLBACK TRANSACTION;
 		END 
 		-- Verification que la quantité saisie est bonne 
 		ELSE IF @qtLot IS NULL OR @qtLot = '' OR @qtLot = 0
 		BEGIN
 			SET @retour = 1;
 			SET @msg = 'Quantité invalide !';
+			ROLLBACK TRANSACTION;
 		END
 		-- Verification que les donnée ne sont pas null
 		ELSE IF @idModele IS NULL OR @idModele = ''
 		BEGIN
 			SET @retour = 1;
 			SET @msg = 'Id du modèle manquant';
+			ROLLBACK TRANSACTION;
 		END
-		-- Verification de l'existance du lot
+		-- Verification de l'existance du modèle
 		ELSE IF NOT EXISTS (
 							SELECT Modele.idModele
 							FROM Modele
@@ -1969,6 +2071,7 @@ AS
 		BEGIN
 			SET @retour = 2;
 			SET @msg = 'Ce Modele n''existe pas';
+			ROLLBACK TRANSACTION;
 		END
 		-- Vérifier que la production n'a pas été lancé
 		ELSE IF NOT EXISTS (
@@ -1980,6 +2083,7 @@ AS
 		BEGIN 
 			SET @retour = 2;
 			SET @msg = 'La production de ce lot a déjà été lancée, il n''est pas modifiable';
+			ROLLBACK TRANSACTION;
 		END
 		ELSE 
 		BEGIN
@@ -1989,12 +2093,14 @@ AS
 			WHERE Lot.idLot = @idLot
 			SET @retour = 0;
 			SET @msg = 'Le lot a bien été modifié'
+			COMMIT TRANSACTION;
 		END
 	END TRY
 
 		BEGIN CATCH
 			SET @retour = 3;
 			SET @msg = 'Exception' + ERROR_MESSAGE();
+			ROLLBACK TRANSACTION;
 	END CATCH
 	RETURN @retour;
 GO
@@ -2013,12 +2119,19 @@ CREATE PROCEDURE sp_mettreAJourStatsLot
 )
 AS
 BEGIN
+	BEGIN TRANSACTION;
+	DECLARE @dummy int;
+	SELECT @dummy = idLot
+	FROM Lot with (holdlock, tablockx),
+	Piece with (holdlock, tablockx)
+	WHERE idLot IS NULL;
 	DECLARE @codeRetour int = -1;
 	SET @messageRetour = 'Non implémenté';
 	IF @idLot IS NULL
 		BEGIN
 			SET @codeRetour = 1;
 			SET @messageRetour = 'Le paramètre 1 (@idLot) ne peut être NULL';
+			ROLLBACK TRANSACTION;
 		END
 	ELSE
 		BEGIN TRY
@@ -2028,11 +2141,13 @@ BEGIN
 				BEGIN
 					SET @codeRetour = 2;
 					SET @messageRetour = 'Stats indisponibles. Le contrôle du lot ''' + CONVERT(varchar(10), @idLot) + ''' n''a pas encore été commencé.';
+					ROLLBACK TRANSACTION;
 				END
 			ELSE IF @etatControle = 'Termine'
 				BEGIN
 					SET @codeRetour = 2;
 					SET @messageRetour = 'Impossible de mettre à jour les stats car le contrôle du lot ''' + CONVERT(varchar(10), @idLot) + ''' est déjà terminé.';
+					ROLLBACK TRANSACTION;
 				END
 			ELSE
 				BEGIN
@@ -2042,6 +2157,7 @@ BEGIN
 						BEGIN
 							SET @codeRetour = 2;
 							SET @messageRetour = 'Stats indisponibles car aucune pièce n''a encore été saisie pour le lot ''' + CONVERT(varchar(10), @idLot) + '.';
+							ROLLBACK TRANSACTION;
 						END
 					ELSE
 						BEGIN
@@ -2063,12 +2179,14 @@ BEGIN
 							WHERE idLot = @idLot;
 							SET @codeRetour = 0;
 							SET @messageRetour = 'Les statistiques réduites du lot ''' + CONVERT(varchar(10), @idLot) + ' ont été mises à jour';
+							COMMIT TRANSACTION;
 						END
 				END
 		END TRY
 		BEGIN CATCH
 			SET @codeRetour = 3;
 			SET @messageRetour = 'Erreur base de données : ' + ERROR_MESSAGE();
+			ROLLBACK TRANSACTION;
 		END CATCH
 	RETURN @codeRetour;
 END
